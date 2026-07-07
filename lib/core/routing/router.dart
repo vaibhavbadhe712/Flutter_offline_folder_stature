@@ -5,9 +5,15 @@ import 'router_refresh_stream.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
+import '../../features/auth/presentation/pages/group_selection_page.dart';
+import '../../features/auth/presentation/pages/otp_verification_page.dart';
+import '../../features/auth/presentation/pages/forgot_password_page.dart';
+import '../../features/auth/presentation/pages/reset_password_page.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../../features/dashboard/presentation/pages/shell_scaffold.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../storage/secure_storage_service.dart';
+import '../di/injection.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 final GlobalKey<NavigatorState> shellNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'shell');
@@ -20,24 +26,36 @@ final routerProvider = Provider<GoRouter>((ref) {
     navigatorKey: rootNavigatorKey,
     initialLocation: '/splash',
     refreshListenable: GoRouterRefreshStream(authStream),
-    redirect: (BuildContext context, GoRouterState state) {
+    redirect: (BuildContext context, GoRouterState state) async {
       final authState = ref.read(authProvider);
 
-      final isLoggingIn = state.matchedLocation == '/login';
       final isSplash = state.matchedLocation == '/splash';
+      final isAuthRoute = state.matchedLocation == '/login' ||
+          state.matchedLocation == '/verify-otp' ||
+          state.matchedLocation == '/forgot-password' ||
+          state.matchedLocation == '/reset-password';
+      final isGroups = state.matchedLocation == '/groups';
 
       return authState.when(
         initial: () => isSplash ? null : '/splash',
-        loading: () => isSplash ? null : '/splash',
-        unauthenticated: () => isLoggingIn ? null : '/login',
-        authenticated: (_) {
-          // If already logged in, skip splash and login pages
-          if (isLoggingIn || isSplash) {
-            return '/dashboard';
+        loading: () => null, // Keep the user on their current page during active loading states
+        unauthenticated: () => isAuthRoute ? null : '/login',
+        authenticated: (_) async {
+          final secureStorage = getIt<SecureStorageService>();
+          final clientId = await secureStorage.getSelectedClientId();
+          final hasGroup = clientId != null && clientId.isNotEmpty;
+
+          if (isAuthRoute || isSplash) {
+            return hasGroup ? '/dashboard' : '/groups';
           }
+
+          if (!isGroups && !hasGroup) {
+            return '/groups';
+          }
+
           return null;
         },
-        error: (_) => isLoggingIn ? null : '/login',
+        error: (_) => isAuthRoute ? null : '/login',
       );
     },
     routes: [
@@ -48,6 +66,28 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginPage(),
+      ),
+      GoRoute(
+        path: '/verify-otp',
+        builder: (context, state) {
+          final phone = state.uri.queryParameters['phone'] ?? '';
+          return OtpVerificationPage(phoneNumber: phone);
+        },
+      ),
+      GoRoute(
+        path: '/groups',
+        builder: (context, state) => const GroupSelectionPage(),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        builder: (context, state) => const ForgotPasswordPage(),
+      ),
+      GoRoute(
+        path: '/reset-password',
+        builder: (context, state) {
+          final email = state.uri.queryParameters['email'] ?? '';
+          return ResetPasswordPage(email: email);
+        },
       ),
       ShellRoute(
         navigatorKey: shellNavigatorKey,

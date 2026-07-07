@@ -1,4 +1,4 @@
-import '../../../../core/database/app_database.dart';
+import 'dart:convert';
 import '../../../../core/storage/secure_storage_service.dart';
 import 'package:injectable/injectable.dart';
 import '../models/user_model.dart';
@@ -8,22 +8,21 @@ abstract class AuthLocalDataSource {
   /// Save access and refresh tokens.
   Future<void> saveTokens(String accessToken, String refreshToken);
 
-  /// Cache the User model in SQLite.
+  /// Cache the User model securely.
   Future<void> saveUser(UserModel user);
 
   /// Retrieve the cached User profile.
   Future<UserModel?> getUser();
 
-  /// Reset all stored session parameters (tokens and DB cache).
+  /// Reset all stored session parameters (tokens and cached user data).
   Future<void> clearSession();
 }
 
 @LazySingleton(as: AuthLocalDataSource)
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   final SecureStorageService _secureStorage;
-  final AppDatabase _database;
 
-  AuthLocalDataSourceImpl(this._secureStorage, this._database);
+  AuthLocalDataSourceImpl(this._secureStorage);
 
   @override
   Future<void> saveTokens(String accessToken, String refreshToken) async {
@@ -33,33 +32,24 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
 
   @override
   Future<void> saveUser(UserModel user) async {
-    // Keep local cache fresh by removing stale records
-    await _database.delete(_database.users).go();
-    await _database.into(_database.users).insert(
-          UsersCompanion.insert(
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-          ),
-        );
+    final userJson = jsonEncode(user.toJson());
+    await _secureStorage.saveUserData(userJson);
   }
 
   @override
   Future<UserModel?> getUser() async {
-    final cached = await _database.select(_database.users).getSingleOrNull();
-    if (cached == null) return null;
-    return UserModel(
-      id: cached.id,
-      email: cached.email,
-      name: cached.name,
-      role: cached.role,
-    );
+    final userJson = await _secureStorage.getUserData();
+    if (userJson == null) return null;
+    try {
+      final userMap = jsonDecode(userJson) as Map<String, dynamic>;
+      return UserModel.fromJson(userMap);
+    } catch (_) {
+      return null;
+    }
   }
 
   @override
   Future<void> clearSession() async {
     await _secureStorage.clearAll();
-    await _database.delete(_database.users).go();
   }
 }

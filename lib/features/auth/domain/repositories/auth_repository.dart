@@ -15,4 +15,20 @@ abstract class AuthRepository {
 
   /// Silently refresh expired access credentials using cached tokens.
   Future<Either<Failure, String>> refreshToken();
+
+  /// Request an OTP code for phone login.
+  Future<Either<Failure, void>> sendOtp(String phoneNumber);
+
+  /// Verify phone number and OTP code.
+  Future<Either<Failure, UserEntity>> verifyOtp(String phoneNumber, String otp);
+
+  /// Request a password reset code.
+  Future<Either<Failure, void>> sendPasswordResetCode(String email);
+
+  /// Reset the password with code.
+  Future<Either<Failure, void>> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  });
 }

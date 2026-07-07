@@ -9,7 +9,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Retrieve environment target via --dart-define=ENV=dev/qa/prod (default is 'dev')
-  const String env = String.fromEnvironment('ENV', defaultValue: 'dev');
+  const String env = String.fromEnvironment('ENV', defaultValue: 'qa');
 
   // Load the corresponding environment configuration from assets
   await dotenv.load(fileName: '.env.$env');

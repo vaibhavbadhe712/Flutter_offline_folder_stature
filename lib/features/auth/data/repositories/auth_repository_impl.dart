@@ -83,4 +83,81 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(AuthFailure('Failed to manually refresh token: $e'));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> sendOtp(String phoneNumber) async {
+    try {
+      await _remoteDataSource.sendOtp(phoneNumber);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode, errorData: e.errorData));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure('An error occurred during sending OTP: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> verifyOtp(String phoneNumber, String otp) async {
+    try {
+      final response = await _remoteDataSource.verifyOtp(phoneNumber, otp);
+
+      final userModel = UserModel.fromJson(response['user'] as Map<String, dynamic>);
+      final accessToken = response['access_token'] as String;
+      final refreshToken = response['refresh_token'] as String;
+
+      // Persist locally
+      await _localDataSource.saveTokens(accessToken, refreshToken);
+      await _localDataSource.saveUser(userModel);
+
+      return Right(userModel.toEntity());
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode, errorData: e.errorData));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure('An error occurred during OTP verification: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> sendPasswordResetCode(String email) async {
+    try {
+      await _remoteDataSource.sendPasswordResetCode(email);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode, errorData: e.errorData));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure('An error occurred while requesting password reset code: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    try {
+      await _remoteDataSource.resetPassword(email: email, code: code, newPassword: newPassword);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode, errorData: e.errorData));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure('An error occurred during password reset: $e'));
+    }
+  }
 }
