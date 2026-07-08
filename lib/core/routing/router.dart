@@ -12,6 +12,9 @@ import '../../features/auth/presentation/pages/reset_password_page.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../../features/dashboard/presentation/pages/shell_scaffold.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/calls/presentation/pages/calls_page.dart';
+import '../../features/dialer/presentation/pages/dialer_page.dart';
+import '../../features/wallet/presentation/pages/wallet_page.dart';
 import '../storage/secure_storage_service.dart';
 import '../di/injection.dart';
 
@@ -43,10 +46,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         authenticated: (_) async {
           final secureStorage = getIt<SecureStorageService>();
           final clientId = await secureStorage.getSelectedClientId();
-          final hasGroup = clientId != null && clientId.isNotEmpty;
+          final hasGroup = clientId?.trim().isNotEmpty == true;
 
           if (isAuthRoute || isSplash) {
             return hasGroup ? '/dashboard' : '/groups';
+          }
+          if (isGroups && hasGroup) {
+            return '/dashboard';
           }
 
           if (!isGroups && !hasGroup) {
@@ -96,6 +102,18 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/dashboard',
             builder: (context, state) => const DashboardPage(),
+          ),
+          GoRoute(
+            path: '/calls',
+            builder: (context, state) => const CallsPage(),
+          ),
+          GoRoute(
+            path: '/dialer',
+            builder: (context, state) => const DialerPage(),
+          ),
+          GoRoute(
+            path: '/wallet',
+            builder: (context, state) => const WalletPage(),
           ),
           GoRoute(
             path: '/profile',

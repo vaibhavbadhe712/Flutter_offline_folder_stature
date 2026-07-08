@@ -64,11 +64,25 @@ class _GroupSelectionPageState extends ConsumerState<GroupSelectionPage> {
     setState(() {
       _isLoading = true;
     });
-    
-    await _secureStorage.saveSelectedClient(clientId, clientName);
-    
-    if (mounted) {
-      context.go('/dashboard');
+
+    try {
+      await _secureStorage.saveSelectedClient(clientId, clientName);
+
+      if (mounted) {
+        context.go('/dashboard');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save workspace selection. Please try again.'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
     }
   }
 

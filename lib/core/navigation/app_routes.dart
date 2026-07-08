@@ -1,0 +1,12 @@
+class AppRoutes {
+  AppRoutes._();
+  
+  static const String defaultLocation = "/";
+  static const String splash = '/splash';
+  static const String login = '/login';
+  static const String dashboard = '/dashboard';
+  static const String calls = '/calls';
+  static const String dialer = '/dialer';
+  static const String wallet = '/wallet';
+  static const String profile = '/profile';
+}
