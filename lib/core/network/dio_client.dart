@@ -155,13 +155,18 @@ class DioClient {
       case DioExceptionType.badCertificate:
         return const ServerException(message: 'Security validation failed (SSL certificate mismatch).', statusCode: 495);
       case DioExceptionType.badResponse:
-        if (code == 401) {
-          return const AuthException(message: 'Session has expired or credentials invalid.');
-        }
-        if (data is Map && data.containsKey('message')) {
-          msg = data['message'] as String;
+        if (data is Map) {
+          if (data.containsKey('message') && data['message'] != null) {
+            msg = data['message'] as String;
+          } else if (data.containsKey('error') && data['error'] != null) {
+            msg = data['error'] as String;
+          }
         } else if (error.response?.statusMessage != null) {
           msg = error.response!.statusMessage!;
+        }
+
+        if (code == 401) {
+          return AuthException(message: msg == 'An unexpected server error occurred' ? 'Session has expired or credentials invalid.' : msg);
         }
         return ServerException(message: msg, statusCode: code, errorData: data);
       case DioExceptionType.cancel:

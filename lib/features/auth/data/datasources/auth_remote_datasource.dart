@@ -38,31 +38,33 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<Map<String, dynamic>> login(String email, String password) async {
-    if (_useMock) {
-      await Future.delayed(const Duration(milliseconds: 800));
-      if (email == 'error@company.com') {
-        throw const AuthException(message: 'Invalid email or password.');
-      }
-      return {
-        'user': {
-          'id': 'mock-user-111',
-          'email': email,
-          'name': 'BAAP AI User',
-          'role': 'Administrator',
-        },
-        'access_token': 'mock_access_token_email',
-        'refresh_token': 'mock_refresh_token_email',
-      };
-    }
-
     final response = await _dioClient.post(
-      '/auth/login',
+      '/auth/api/auth/login',
       data: {
         'email': email,
         'password': password,
+        'captchaToken': null,
       },
     );
-    return response.data as Map<String, dynamic>;
+
+    final responseData = response.data as Map<String, dynamic>;
+    final userJson = responseData['user'] as Map<String, dynamic>;
+    final firstName = userJson['first_name'] as String? ?? '';
+    final lastName = userJson['last_name'] as String? ?? '';
+    final name = '$firstName $lastName'.trim();
+
+    final mappedUser = {
+      'id': userJson['id'] as String? ?? '',
+      'email': userJson['email'] as String? ?? '',
+      'name': name.isEmpty ? 'BAAP AI User' : name,
+      'role': 'User',
+    };
+
+    return {
+      'user': mappedUser,
+      'access_token': responseData['access_token'] as String? ?? '',
+      'refresh_token': responseData['refresh_token'] as String? ?? '',
+    };
   }
 
   @override
