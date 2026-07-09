@@ -1,38 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../core/utils/constants/app_colors.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final authState = ref.watch(authProvider);
 
     final String name = authState.maybeWhen(
       authenticated: (user) => user.name,
-      orElse: () => 'Enterprise Employee',
+      orElse: () => 'Rao',
     );
     final String email = authState.maybeWhen(
       authenticated: (user) => user.email,
-      orElse: () => 'employee@enterprise.com',
+      orElse: () => 'rao@baapcompany.com',
     );
-    final String role = authState.maybeWhen(
-      authenticated: (user) => user.role,
-      orElse: () => 'Employee',
-    );
+    final String firstLetter = name.isNotEmpty ? name[0].toUpperCase() : 'R';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FC),
+      backgroundColor: AppColors.scaffoldBg,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF8F9FC),
+        backgroundColor: AppColors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
+        titleSpacing: 24,
         title: const Text(
           'More',
           style: TextStyle(
-            color: Color(0xFF0F172A),
+            color: AppColors.darkText,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
@@ -40,199 +38,149 @@ class ProfilePage extends ConsumerWidget {
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Profile Card Info
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFFF1F5F9)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.015),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 36,
-                    backgroundColor: theme.colorScheme.primaryContainer,
-                    child: Text(
-                      name.isNotEmpty ? name.substring(0, 2).toUpperCase() : 'EE',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.primary,
-                      ),
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 32,
+                  backgroundColor: AppColors.noticeYellowBg, // Custom Yellow background
+                  child: Text(
+                    firstLetter,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.noticeYellowText, // Custom Gold text
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          name,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF0F172A),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          email,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Color(0xFF64748B),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            role,
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Assigned Permissions Box
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFEFF6FF),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFDBEAFE)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.security, color: Color(0xFF2563EB), size: 20),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'Assigned Permissions',
-                        style: TextStyle(
-                          fontSize: 14,
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E40AF),
+                          color: AppColors.darkText,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        email,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.greyText,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'READ_DASHBOARD, WRITE_SYNC_MUTATION',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF1E3A8A),
-                      letterSpacing: 0.1,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
             const SizedBox(height: 24),
 
-            // Settings options list
+            // First White Card (Options)
             Container(
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFFF1F5F9)),
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: AppColors.scaffoldBg, width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.blackColor.withValues(alpha: 0.02),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 children: [
                   _buildOptionItem(
-                    icon: Icons.person_outline,
-                    title: 'Account Settings',
-                    subtitle: 'Manage profile info and details',
+                    icon: Icons.person_outline_rounded,
+                    title: 'Profile Details',
+                    subtitle: 'Name, email, verified phone',
                     onTap: () {},
                   ),
-                  const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                  const SizedBox(height: 20),
                   _buildOptionItem(
-                    icon: Icons.notifications_none,
-                    title: 'Notifications',
-                    subtitle: 'Manage alert preferences',
+                    icon: Icons.tune_rounded,
+                    title: 'AI Agent Settings',
+                    subtitle: 'Model, knowledge base, intents',
                     onTap: () {},
                   ),
-                  const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                  const SizedBox(height: 20),
                   _buildOptionItem(
-                    icon: Icons.lock_outline,
-                    title: 'Privacy & Security',
-                    subtitle: 'Change password and security controls',
+                    icon: Icons.call_outlined,
+                    title: 'Number Marketplace',
+                    subtitle: 'Browse & buy virtual numbers',
                     onTap: () {},
                   ),
-                  const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                  const SizedBox(height: 20),
                   _buildOptionItem(
-                    icon: Icons.help_outline,
-                    title: 'Help & Support',
-                    subtitle: 'FAQs, contact support team',
+                    icon: Icons.settings_outlined,
+                    title: 'Carrier Routing',
+                    subtitle: 'Telecom provider priority',
                     onTap: () {},
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
-            // Logout Option
+            // Second White Card (Logout)
             Container(
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFF1F5F9)),
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.scaffoldBg, width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.blackColor.withValues(alpha: 0.02),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              child: ListTile(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFEE2E2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.logout, color: Colors.red, size: 20),
-                ),
-                title: const Text(
-                  'Log Out',
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                subtitle: const Text('Exit your active session safely'),
-                trailing: const Icon(Icons.chevron_right, color: Colors.red, size: 20),
+              child: InkWell(
                 onTap: () {
                   ref.read(authProvider.notifier).logout();
                 },
+                borderRadius: BorderRadius.circular(16),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: AppColors.noticeRedBg, // Custom Red background
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.logout_rounded,
+                        color: AppColors.errorRed, // Custom Red icon
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    const Text(
+                      'Log out',
+                      style: TextStyle(
+                        color: AppColors.errorRed, // Custom Red text
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -245,29 +193,57 @@ class ProfilePage extends ConsumerWidget {
     required String subtitle,
     required VoidCallback onTap,
   }) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8F9FC),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(icon, color: const Color(0xFF475569), size: 22),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: Color(0xFF0F172A),
-          fontWeight: FontWeight.w600,
-          fontSize: 14,
-        ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: const TextStyle(fontSize: 12),
-      ),
-      trailing: const Icon(Icons.chevron_right, color: Color(0xFF94A3B8), size: 20),
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Row(
+        children: [
+          // Icon Container
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: AppColors.skyBlueColor, // Custom Sky Blue background
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: AppColors.primaryBlue, // Custom Blue icon
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 16),
+          // Texts
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: AppColors.darkText,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    color: AppColors.greyText,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(
+            Icons.chevron_right_rounded,
+            color: AppColors.lightGrey, 
+            size: 22,
+          ),
+        ],
+      ),
     );
   }
 }
