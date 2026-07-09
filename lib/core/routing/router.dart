@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'router_refresh_stream.dart';
+import '../navigation/app_routes.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/pages/signup_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/auth/presentation/pages/group_selection_page.dart';
 import '../../features/auth/presentation/pages/otp_verification_page.dart';
@@ -27,69 +29,74 @@ final routerProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: '/splash',
+    initialLocation: AppRoutes.splash,
     refreshListenable: GoRouterRefreshStream(authStream),
     redirect: (BuildContext context, GoRouterState state) async {
       final authState = ref.read(authProvider);
 
-      final isSplash = state.matchedLocation == '/splash';
-      final isAuthRoute = state.matchedLocation == '/login' ||
-          state.matchedLocation == '/verify-otp' ||
-          state.matchedLocation == '/forgot-password' ||
-          state.matchedLocation == '/reset-password';
-      final isGroups = state.matchedLocation == '/groups';
+      final isSplash = state.matchedLocation == AppRoutes.splash;
+      final isAuthRoute = state.matchedLocation == AppRoutes.login ||
+          state.matchedLocation == AppRoutes.signup ||
+          state.matchedLocation == AppRoutes.verifyOtp ||
+          state.matchedLocation == AppRoutes.forgotPassword ||
+          state.matchedLocation == AppRoutes.resetPassword;
+      final isGroups = state.matchedLocation == AppRoutes.groups;
 
       return authState.when(
-        initial: () => isSplash ? null : '/splash',
+        initial: () => isSplash ? null : AppRoutes.splash,
         loading: () => null, // Keep the user on their current page during active loading states
-        unauthenticated: () => isAuthRoute ? null : '/login',
+        unauthenticated: () => isAuthRoute ? null : AppRoutes.login,
         authenticated: (_) async {
           final secureStorage = getIt<SecureStorageService>();
           final clientId = await secureStorage.getSelectedClientId();
           final hasGroup = clientId?.trim().isNotEmpty == true;
 
           if (isAuthRoute || isSplash) {
-            return hasGroup ? '/dashboard' : '/groups';
+            return hasGroup ? AppRoutes.dashboard : AppRoutes.groups;
           }
           if (isGroups && hasGroup) {
-            return '/dashboard';
+            return AppRoutes.dashboard;
           }
 
           if (!isGroups && !hasGroup) {
-            return '/groups';
+            return AppRoutes.groups;
           }
 
           return null;
         },
-        error: (_) => isAuthRoute ? null : '/login',
+        error: (_) => isAuthRoute ? null : AppRoutes.login,
       );
     },
     routes: [
       GoRoute(
-        path: '/splash',
+        path: AppRoutes.splash,
         builder: (context, state) => const SplashPage(),
       ),
       GoRoute(
-        path: '/login',
+        path: AppRoutes.login,
         builder: (context, state) => const LoginPage(),
       ),
       GoRoute(
-        path: '/verify-otp',
+        path: AppRoutes.signup,
+        builder: (context, state) => const SignupPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.verifyOtp,
         builder: (context, state) {
           final phone = state.uri.queryParameters['phone'] ?? '';
           return OtpVerificationPage(phoneNumber: phone);
         },
       ),
       GoRoute(
-        path: '/groups',
+        path: AppRoutes.groups,
         builder: (context, state) => const GroupSelectionPage(),
       ),
       GoRoute(
-        path: '/forgot-password',
+        path: AppRoutes.forgotPassword,
         builder: (context, state) => const ForgotPasswordPage(),
       ),
       GoRoute(
-        path: '/reset-password',
+        path: AppRoutes.resetPassword,
         builder: (context, state) {
           final email = state.uri.queryParameters['email'] ?? '';
           return ResetPasswordPage(email: email);
@@ -100,23 +107,23 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state, child) => ShellScaffold(child: child),
         routes: [
           GoRoute(
-            path: '/dashboard',
+            path: AppRoutes.dashboard,
             builder: (context, state) => const DashboardPage(),
           ),
           GoRoute(
-            path: '/calls',
+            path: AppRoutes.calls,
             builder: (context, state) => const CallsPage(),
           ),
           GoRoute(
-            path: '/dialer',
+            path: AppRoutes.dialer,
             builder: (context, state) => const DialerPage(),
           ),
           GoRoute(
-            path: '/wallet',
+            path: AppRoutes.wallet,
             builder: (context, state) => const WalletPage(),
           ),
           GoRoute(
-            path: '/profile',
+            path: AppRoutes.profile,
             builder: (context, state) => const ProfilePage(),
           ),
         ],

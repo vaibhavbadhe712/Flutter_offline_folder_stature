@@ -8,56 +8,86 @@ import '../../../../core/navigation/app_routes.dart';
 import '../../../../core/utils/toast_services/toast_services.dart';
 import '../../../../core/utils/constants/app_colors.dart';
 
-class LoginPage extends ConsumerStatefulWidget {
-  const LoginPage({super.key});
+class SignupPage extends ConsumerStatefulWidget {
+  const SignupPage({super.key});
 
   @override
-  ConsumerState<LoginPage> createState() => _LoginPageState();
+  ConsumerState<SignupPage> createState() => _SignupPageState();
 }
 
-class _LoginPageState extends ConsumerState<LoginPage> {
-  final _emailFormKey = GlobalKey<FormState>();
+class _SignupPageState extends ConsumerState<SignupPage> {
   final _phoneFormKey = GlobalKey<FormState>();
+  final _emailFormKey = GlobalKey<FormState>();
 
+  final _fullNameController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _phoneController = TextEditingController();
 
   int _selectedTab = 0; // 0 = Phone OTP, 1 = Email
+  bool _registerBusiness = false;
   bool _obscurePassword = true;
   String _currentLanguage = 'English';
+  bool _isMockLoading = false;
 
   @override
   void dispose() {
+    _fullNameController.dispose();
+    _phoneController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-    _phoneController.dispose();
     super.dispose();
   }
 
-  void _submitEmailLogin() {
-    if (_emailFormKey.currentState?.validate() ?? false) {
-      ref.read(authProvider.notifier).login(
-            _emailController.text.trim(),
-            _passwordController.text,
-          );
+  String _getCleanedPhoneNumber(String val) {
+    final cleaned = val.replaceAll(RegExp(r'\D'), '');
+    if (cleaned.length > 10) {
+      // If it contains country code like 91, strip it or take last 10 digits
+      return '+91 ${cleaned.substring(cleaned.length - 10)}';
+    }
+    return '+91 $cleaned';
+  }
+
+  void _submitPhoneSignup() async {
+    if (_phoneFormKey.currentState?.validate() ?? false) {
+      final phone = _phoneController.text.trim();
+      final fullPhoneNumber = _getCleanedPhoneNumber(phone);
+      
+      // Call the existing OTP flow
+      final success = await ref.read(authProvider.notifier).sendOtp(fullPhoneNumber);
+      if (success && mounted) {
+        ToastServices.success('OTP Sent', 'OTP sent to $fullPhoneNumber for verification.');
+        context.push('${AppRoutes.verifyOtp}?phone=${Uri.encodeComponent(fullPhoneNumber)}');
+      }
     }
   }
 
-  void _requestOtp() async {
-    if (_phoneFormKey.currentState?.validate() ?? false) {
-      final phone = _phoneController.text.trim();
-      final fullPhoneNumber = '+91 $phone';
-      final success = await ref.read(authProvider.notifier).sendOtp(fullPhoneNumber);
-      if (success && mounted) {
-        context.push('${AppRoutes.verifyOtp}?phone=${Uri.encodeComponent(fullPhoneNumber)}');
+  void _submitEmailSignup() async {
+    if (_emailFormKey.currentState?.validate() ?? false) {
+      setState(() {
+        _isMockLoading = true;
+      });
+
+      await Future.delayed(const Duration(milliseconds: 1500));
+
+      if (mounted) {
+        setState(() {
+          _isMockLoading = false;
+        });
+
+        ToastServices.success('Success', 'Account created successfully! Please log in.');
+        
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.push(AppRoutes.login);
+        }
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Listen for error states
     ref.listen<AuthState>(authProvider, (previous, next) {
       next.maybeWhen(
         error: (message) {
@@ -68,7 +98,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     });
 
     final authState = ref.watch(authProvider);
-    final isLoading = authState.maybeWhen(loading: () => true, orElse: () => false);
+    final isAuthLoading = authState.maybeWhen(loading: () => true, orElse: () => false);
+    final isLoading = isAuthLoading || _isMockLoading;
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
@@ -134,7 +165,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               
               // Titles
               const Text(
-                'Welcome back',
+                'Create your account',
                 style: TextStyle(
                   fontFamily: 'Outfit',
                   fontSize: 26,
@@ -144,7 +175,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               ),
               const SizedBox(height: 6),
               const Text(
-                'Sign in to your BAAP AI console',
+                'Start automating calls in minutes',
                 style: TextStyle(
                   fontSize: 14,
                   color: AppColors.greyText,
@@ -158,43 +189,27 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               
               const SizedBox(height: 24),
               
-              // Form view based on selection
               _selectedTab == 0 ? _buildPhoneForm(isLoading) : _buildEmailForm(isLoading),
               
               const SizedBox(height: 20),
               
-              // Forgot password? Link
-              Align(
-                alignment: Alignment.centerRight,
-                child: GestureDetector(
-                  onTap: () => context.push(AppRoutes.forgotPassword),
-                  child: const Text(
-                    'Forgot password?',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.indigo,
-                    ),
-                  ),
-                ),
-              ),
+              _buildBusinessCheckbox(),
               
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
               
-              // Primary Submit Button
               SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
                   onPressed: isLoading
                       ? null
-                      : (_selectedTab == 1 ? _submitEmailLogin : _requestOtp),
+                      : (_selectedTab == 0 ? _submitPhoneSignup : _submitEmailSignup),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.indigo,
                     foregroundColor: AppColors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   child: isLoading
@@ -210,7 +225,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'Log In',
+                              'Create Account',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -225,18 +240,24 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               
               const SizedBox(height: 32),
               
-              // Sign Up option
+              // Log In Option Link
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    'New here? ',
+                    'Already have an account? ',
                     style: TextStyle(fontSize: 14, color: AppColors.greyText),
                   ),
                   GestureDetector(
-                    onTap: () => context.push(AppRoutes.signup),
+                    onTap: () {
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.push(AppRoutes.login);
+                      }
+                    },
                     child: const Text(
-                      'Sign up',
+                      'Log in',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -334,6 +355,48 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Full Name Input
+          TextFormField(
+            controller: _fullNameController,
+            keyboardType: TextInputType.name,
+            enabled: !isLoading,
+            style: const TextStyle(color: AppColors.darkSlate, fontSize: 15),
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.person_outline_rounded, color: AppColors.iconGrey),
+              hintText: 'Full name',
+              hintStyle: const TextStyle(color: AppColors.iconGrey),
+              filled: true,
+              fillColor: AppColors.white,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.lightGrey, width: 1.5),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.indigo, width: 2),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.errorRed, width: 1.5),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.errorRed, width: 2),
+              ),
+            ),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter your full name';
+              }
+              if (value.trim().length < 2) {
+                return 'Name must be at least 2 characters';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 16),
+          // Phone Input
           TextFormField(
             controller: _phoneController,
             keyboardType: TextInputType.phone,
@@ -344,30 +407,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               LengthLimitingTextInputFormatter(10),
             ],
             decoration: InputDecoration(
-              prefixIcon: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(width: 16),
-                  const Icon(Icons.phone_android_rounded, color: AppColors.iconGrey),
-                  const SizedBox(width: 8),
-                  const Text(
-                    '+91',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.darkSlate,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    height: 20,
-                    width: 1.5,
-                    color: AppColors.lightGreyColor,
-                  ),
-                  const SizedBox(width: 12),
-                ],
-              ),
-              hintText: '98765 43210',
+              prefixIcon: const Icon(Icons.phone_android_rounded, color: AppColors.iconGrey),
+              hintText: '+91 98765 43210',
               hintStyle: const TextStyle(color: AppColors.iconGrey),
               filled: true,
               fillColor: AppColors.white,
@@ -393,7 +434,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               if (value == null || value.trim().isEmpty) {
                 return 'Please enter your phone number';
               }
-              if (value.trim().length != 10) {
+              final clean = value.replaceAll(RegExp(r'\D'), '');
+              if (clean.length != 10) {
                 return 'Phone number must be exactly 10 digits';
               }
               return null;
@@ -417,6 +459,48 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       key: _emailFormKey,
       child: Column(
         children: [
+          // Full Name Input
+          TextFormField(
+            controller: _fullNameController,
+            keyboardType: TextInputType.name,
+            enabled: !isLoading,
+            style: const TextStyle(color: AppColors.darkSlate, fontSize: 15),
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.person_outline_rounded, color: AppColors.iconGrey),
+              hintText: 'Full name',
+              hintStyle: const TextStyle(color: AppColors.iconGrey),
+              filled: true,
+              fillColor: AppColors.white,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.lightGrey, width: 1.5),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.indigo, width: 2),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.errorRed, width: 1.5),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.errorRed, width: 2),
+              ),
+            ),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter your full name';
+              }
+              if (value.trim().length < 2) {
+                return 'Name must be at least 2 characters';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 16),
+          // Email Input
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
@@ -457,6 +541,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             },
           ),
           const SizedBox(height: 16),
+          // Password Input
           TextFormField(
             controller: _passwordController,
             obscureText: _obscurePassword,
@@ -504,6 +589,55 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             },
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBusinessCheckbox() {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _registerBusiness = !_registerBusiness;
+        });
+      },
+      child: Container(
+        height: 56,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: AppColors.scaffoldBg,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: _registerBusiness ? AppColors.indigo : AppColors.lightGreyColor,
+                  width: 2,
+                ),
+                borderRadius: BorderRadius.circular(6),
+                color: _registerBusiness ? AppColors.indigo : AppColors.transparent,
+              ),
+              child: _registerBusiness
+                  ? const Icon(
+                      Icons.check,
+                      size: 14,
+                      color: AppColors.white,
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Register your Business',
+              style: TextStyle(
+                fontSize: 15,
+                color: AppColors.darkSlate,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

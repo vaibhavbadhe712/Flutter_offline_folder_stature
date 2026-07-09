@@ -4,6 +4,11 @@ class AppRoutes {
   static const String defaultLocation = "/";
   static const String splash = '/splash';
   static const String login = '/login';
+  static const String signup = '/signup';
+  static const String verifyOtp = '/verify-otp';
+  static const String groups = '/groups';
+  static const String forgotPassword = '/forgot-password';
+  static const String resetPassword = '/reset-password';
   static const String dashboard = '/dashboard';
   static const String calls = '/calls';
   static const String dialer = '/dialer';
