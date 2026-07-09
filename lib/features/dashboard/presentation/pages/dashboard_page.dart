@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/database/sync_engine.dart';
 import '../../../../core/di/injection.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../widgets/activity_list_item.dart';
 
 final timeframeProvider = StateProvider<String>((ref) => '7 Days');
 
@@ -169,7 +170,7 @@ class DashboardPage extends ConsumerWidget {
 
             // Stat Cards Horizontal List
             SizedBox(
-              height: 140,
+              height: 152,
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
@@ -234,7 +235,7 @@ class DashboardPage extends ConsumerWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               children: [
-                _buildActivityItem(
+                ActivityListItem(
                   initials: 'RD',
                   avatarBgColor: const Color(0xFFE0E7FF),
                   avatarTextColor: const Color(0xFF4F46E5),
@@ -245,7 +246,7 @@ class DashboardPage extends ConsumerWidget {
                   statusTextColor: const Color(0xFF059669),
                   statusBgColor: const Color(0xFFD1FAE5),
                 ),
-                _buildActivityItem(
+                ActivityListItem(
                   initials: 'AK',
                   avatarBgColor: const Color(0xFFF3E8FF),
                   avatarTextColor: const Color(0xFF9333EA),
@@ -256,7 +257,7 @@ class DashboardPage extends ConsumerWidget {
                   statusTextColor: const Color(0xFFD97706),
                   statusBgColor: const Color(0xFFFEF3C7),
                 ),
-                _buildActivityItem(
+                ActivityListItem(
                   initials: 'VN',
                   avatarBgColor: const Color(0xFFFEE2E2),
                   avatarTextColor: const Color(0xFFDC2626),
@@ -267,7 +268,7 @@ class DashboardPage extends ConsumerWidget {
                   statusTextColor: const Color(0xFFB91C1C),
                   statusBgColor: const Color(0xFFFEE2E2),
                 ),
-                _buildActivityItem(
+                ActivityListItem(
                   initials: 'PS',
                   avatarBgColor: const Color(0xFFE0F2FE),
                   avatarTextColor: const Color(0xFF0284C7),
@@ -278,7 +279,7 @@ class DashboardPage extends ConsumerWidget {
                   statusTextColor: const Color(0xFF059669),
                   statusBgColor: const Color(0xFFD1FAE5),
                 ),
-                _buildActivityItem(
+                ActivityListItem(
                   initials: 'KM',
                   avatarBgColor: const Color(0xFFE0F8E8),
                   avatarTextColor: const Color(0xFF16A34A),
@@ -289,7 +290,7 @@ class DashboardPage extends ConsumerWidget {
                   statusTextColor: const Color(0xFFD97706),
                   statusBgColor: const Color(0xFFFEF3C7),
                 ),
-                _buildActivityItem(
+                ActivityListItem(
                   initials: 'SP',
                   avatarBgColor: const Color(0xFFEDE9FE),
                   avatarTextColor: const Color(0xFF6D28D9),
@@ -448,94 +449,4 @@ class DashboardPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildActivityItem({
-    required String initials,
-    required Color avatarBgColor,
-    required Color avatarTextColor,
-    required String name,
-    required String subtitle,
-    required String amount,
-    required String status,
-    required Color statusTextColor,
-    required Color statusBgColor,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: avatarBgColor,
-            child: Text(
-              initials,
-              style: TextStyle(
-                color: avatarTextColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    color: Color(0xFF0F172A),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    color: Color(0xFF64748B),
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                amount,
-                style: const TextStyle(
-                  color: Color(0xFF0F172A),
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: statusBgColor,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  status,
-                  style: TextStyle(
-                    color: statusTextColor,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 }
