@@ -1,3 +1,5 @@
+import 'package:go_router/go_router.dart';
+import '../../../../core/navigation/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -12,13 +14,13 @@ class ProfilePage extends ConsumerWidget {
 
     final String name = authState.maybeWhen(
       authenticated: (user) => user.name,
-      orElse: () => 'Rao',
+      orElse: () => '',
     );
     final String email = authState.maybeWhen(
       authenticated: (user) => user.email,
-      orElse: () => 'rao@baapcompany.com',
+      orElse: () => '',
     );
-    final String firstLetter = name.isNotEmpty ? name[0].toUpperCase() : 'R';
+    final String firstLetter = name.isNotEmpty ? name[0].toUpperCase() : 'U';
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
@@ -105,28 +107,36 @@ class ProfilePage extends ConsumerWidget {
                     icon: Icons.person_outline_rounded,
                     title: 'Profile Details',
                     subtitle: 'Name, email, verified phone',
-                    onTap: () {},
+                    onTap: () {
+                      context.push(AppRoutes.profileDetails);
+                    },
                   ),
                   const SizedBox(height: 20),
                   _buildOptionItem(
                     icon: Icons.tune_rounded,
                     title: 'AI Agent Settings',
                     subtitle: 'Model, knowledge base, intents',
-                    onTap: () {},
+                    onTap: () {
+                      context.push(AppRoutes.aiAgentSettings);
+                    },
                   ),
                   const SizedBox(height: 20),
                   _buildOptionItem(
                     icon: Icons.call_outlined,
                     title: 'Number Marketplace',
                     subtitle: 'Browse & buy virtual numbers',
-                    onTap: () {},
+                    onTap: () {
+                      context.push(AppRoutes.numberMarketplace);
+                    },
                   ),
                   const SizedBox(height: 20),
                   _buildOptionItem(
                     icon: Icons.settings_outlined,
                     title: 'Carrier Routing',
                     subtitle: 'Telecom provider priority',
-                    onTap: () {},
+                    onTap: () {
+                      context.push(AppRoutes.carrierRouting);
+                    },
                   ),
                 ],
               ),
