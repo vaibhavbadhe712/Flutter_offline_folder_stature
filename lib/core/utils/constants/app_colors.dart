@@ -150,4 +150,18 @@ class AppColors {
   static const Color logoutRed = Color(0xFFF44336);
   static const Color logogreay = Color(0xFFEEEEEE);
   static const Color backgroundLight = Color(0xFFF7F7F7);
+
+  // Avatar palette (Recent Activity / Campaign History rows)
+  static const Color avatarIndigoBg = Color(0xFFE0E7FF);
+  static const Color avatarIndigoText = Color(0xFF4F46E5);
+  static const Color avatarSkyBg = Color(0xFFE0F2FE);
+  static const Color avatarSkyText = Color(0xFF0284C7);
+  static const Color avatarVioletBg = Color(0xFFEDE9FE);
+  static const Color avatarVioletText = Color(0xFF6D28D9);
+
+  // Status pill palette (Positive / Negative badges)
+  static const Color statusPositiveText = Color(0xFF059669);
+  static const Color statusNegativeText = Color(0xFFB91C1C);
+
+  static const Color fieldBorderColor = Color(0xFFE2E8F0);
 }

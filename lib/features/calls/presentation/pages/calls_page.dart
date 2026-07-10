@@ -28,8 +28,8 @@ class _CampaignEntry {
 const _campaignHistory = [
   _CampaignEntry(
     initials: 'RD',
-    avatarBg: Color(0xFFE0E7FF),
-    avatarText: Color(0xFF4F46E5),
+    avatarBg: AppColors.avatarIndigoBg,
+    avatarText: AppColors.avatarIndigoText,
     name: 'Rohan Deshmukh',
     subtitle: '10:42 AM · AI Call',
     amount: '₹4.20',
@@ -37,8 +37,8 @@ const _campaignHistory = [
   ),
   _CampaignEntry(
     initials: 'VN',
-    avatarBg: Color(0xFFFEE2E2),
-    avatarText: Color(0xFFDC2626),
+    avatarBg: AppColors.noticeRedBg,
+    avatarText: AppColors.noticeRedText,
     name: 'Vikram Nair',
     subtitle: '09:58 AM · AI Call',
     amount: '₹2.10',
@@ -46,8 +46,8 @@ const _campaignHistory = [
   ),
   _CampaignEntry(
     initials: 'PS',
-    avatarBg: Color(0xFFE0F2FE),
-    avatarText: Color(0xFF0284C7),
+    avatarBg: AppColors.avatarSkyBg,
+    avatarText: AppColors.avatarSkyText,
     name: 'Priya Sharma',
     subtitle: '09:30 AM · AI Call',
     amount: '₹6.75',
@@ -55,8 +55,8 @@ const _campaignHistory = [
   ),
   _CampaignEntry(
     initials: 'SP',
-    avatarBg: Color(0xFFEDE9FE),
-    avatarText: Color(0xFF6D28D9),
+    avatarBg: AppColors.avatarVioletBg,
+    avatarText: AppColors.avatarVioletText,
     name: 'Sneha Patil',
     subtitle: '08:47 AM · AI Call',
     amount: '₹3.60',
@@ -143,8 +143,8 @@ class _CallsPageState extends State<CallsPage> {
                       subtitle: entry.subtitle,
                       amount: entry.amount,
                       status: entry.isPositive ? 'Positive' : 'Negative',
-                      statusTextColor: AppColors.black,
-                      statusBgColor: entry.isPositive ? AppColors.greenColor : AppColors.redColor,
+                      statusTextColor: entry.isPositive ? AppColors.statusPositiveText : AppColors.statusNegativeText,
+                      statusBgColor: entry.isPositive ? AppColors.mintGreen : AppColors.noticeRedBg,
                     ),
                 ],
               ),
@@ -184,7 +184,7 @@ class _CallsPageState extends State<CallsPage> {
       Container(
         padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(
-          border: Border.all(color: AppColors.white),
+          border: Border.all(color: AppColors.fieldBorderColor),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -218,7 +218,7 @@ class _CallsPageState extends State<CallsPage> {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
             decoration: BoxDecoration(
-              border: Border.all(color: AppColors.white),
+              border: Border.all(color: AppColors.fieldBorderColor),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Row(
@@ -277,7 +277,7 @@ class _CallsPageState extends State<CallsPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.white),
+        border: Border.all(color: AppColors.fieldBorderColor),
         borderRadius: BorderRadius.circular(12),
       ),
       child: DropdownButtonHideUnderline(
