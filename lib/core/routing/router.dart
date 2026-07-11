@@ -14,6 +14,11 @@ import '../../features/auth/presentation/pages/reset_password_page.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../../features/dashboard/presentation/pages/shell_scaffold.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/profile/presentation/pages/profile_details_page.dart';
+import '../../features/profile/ai_agent_settings_screen.dart';
+import '../../features/profile/number_marketplace_screen.dart';
+import '../../features/profile/carrier_routing_screen.dart';
+import '../../features/widgets/profile_widgets.dart';
 import '../../features/calls/presentation/pages/calls_page.dart';
 import '../../features/dialer/presentation/pages/dialer_page.dart';
 import '../../features/wallet/presentation/pages/wallet_page.dart';
@@ -125,6 +130,47 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.profile,
             builder: (context, state) => const ProfilePage(),
+          ),
+          GoRoute(
+            path: AppRoutes.profileDetails,
+            builder: (context, state) {
+              final authState = ref.read(authProvider);
+              final userEntity = authState.maybeWhen(
+                authenticated: (user) => user,
+                orElse: () => null,
+              );
+              
+              final profileUser = ProfileUser(
+                fullName: userEntity?.name ?? '',
+                email: userEntity?.email.contains('@') == true ? (userEntity?.email ?? '') : '',
+                phone: userEntity?.email.contains('@') == false ? (userEntity?.email ?? '') : '',
+                isPhoneVerified: true,
+              );
+              
+              return ProfileDetailsPage(
+                user: profileUser,
+                onSave: (updatedUser) async {
+                },
+                onSendOtp: (newNumber) async {
+                  await ref.read(authProvider.notifier).sendOtp(newNumber);
+                },
+              );
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.aiAgentSettings,
+            builder: (context, state) => const AiAgentSettingsScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.numberMarketplace,
+            builder: (context, state) => NumberMarketplaceScreen(
+              onBuy: (listing) {
+              },
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.carrierRouting,
+            builder: (context, state) => const CarrierRoutingScreen(),
           ),
         ],
       ),

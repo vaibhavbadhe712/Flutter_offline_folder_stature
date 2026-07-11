@@ -18,8 +18,14 @@ class ShellScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     // Determine selected index by reading route matching details.
     final location = GoRouterState.of(context).matchedLocation;
-    final index = _routes.indexOf(location);
-    final selectedIndex = index == -1 ? 0 : index;
+    int selectedIndex = _routes.indexOf(location);
+    if (selectedIndex == -1) {
+      if (location.startsWith('/profile') || location.startsWith('/ai-agent-settings') || location.startsWith('/number-marketplace') || location.startsWith('/carrier-routing')) {
+        selectedIndex = 4;
+      } else {
+        selectedIndex = 0;
+      }
+    }
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;

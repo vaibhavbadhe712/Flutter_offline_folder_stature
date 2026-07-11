@@ -14,4 +14,8 @@ class AppRoutes {
   static const String dialer = '/dialer';
   static const String wallet = '/wallet';
   static const String profile = '/profile';
+  static const String profileDetails = '/profile-details';
+  static const String aiAgentSettings = '/ai-agent-settings';
+  static const String numberMarketplace = '/number-marketplace';
+  static const String carrierRouting = '/carrier-routing';
 }
