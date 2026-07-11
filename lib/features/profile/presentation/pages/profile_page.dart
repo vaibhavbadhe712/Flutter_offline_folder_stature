@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../../core/utils/constants/app_colors.dart';
+import '../../../../core/navigation/app_routes.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -105,7 +107,7 @@ class ProfilePage extends ConsumerWidget {
                     icon: Icons.person_outline_rounded,
                     title: 'Profile Details',
                     subtitle: 'Name, email, verified phone',
-                    onTap: () {},
+                    onTap: () => context.push(AppRoutes.profileDetails),
                   ),
                   const SizedBox(height: 20),
                   _buildOptionItem(

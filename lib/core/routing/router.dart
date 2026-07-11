@@ -14,6 +14,7 @@ import '../../features/auth/presentation/pages/reset_password_page.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../../features/dashboard/presentation/pages/shell_scaffold.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/profile/presentation/pages/profile_details_page.dart';
 import '../../features/calls/presentation/pages/calls_page.dart';
 import '../../features/dialer/presentation/pages/dialer_page.dart';
 import '../../features/wallet/presentation/pages/wallet_page.dart';
@@ -101,6 +102,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           final email = state.uri.queryParameters['email'] ?? '';
           return ResetPasswordPage(email: email);
         },
+      ),
+      GoRoute(
+        path: AppRoutes.profileDetails,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const ProfileDetailsPage(),
       ),
       ShellRoute(
         navigatorKey: shellNavigatorKey,
