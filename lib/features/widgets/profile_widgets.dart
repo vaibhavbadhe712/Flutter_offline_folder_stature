@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/utils/constants/app_colors.dart';
+import '../../core/utils/constants/app_colors.dart';
 
 class ProfileUser {
   final String fullName;

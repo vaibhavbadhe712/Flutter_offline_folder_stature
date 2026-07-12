@@ -56,7 +56,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
       // Call the existing OTP flow
       final success = await ref.read(authProvider.notifier).sendOtp(fullPhoneNumber);
       if (success && mounted) {
-        ToastServices.success('OTP Sent', 'OTP sent to $fullPhoneNumber for verification.');
         context.push('${AppRoutes.verifyOtp}?phone=${Uri.encodeComponent(fullPhoneNumber)}');
       }
     }
@@ -64,24 +63,21 @@ class _SignupPageState extends ConsumerState<SignupPage> {
 
   void _submitEmailSignup() async {
     if (_emailFormKey.currentState?.validate() ?? false) {
-      setState(() {
-        _isMockLoading = true;
-      });
+      final email = _emailController.text.trim();
+      final password = _passwordController.text;
+      final name = _fullNameController.text.trim();
+      final phone = _phoneController.text.trim();
 
-      await Future.delayed(const Duration(milliseconds: 1500));
+      final success = await ref.read(authProvider.notifier).signUp(
+        email: email,
+        password: password,
+        name: name,
+        phone: phone,
+      );
 
-      if (mounted) {
-        setState(() {
-          _isMockLoading = false;
-        });
-
+      if (success && mounted) {
         ToastServices.success('Success', 'Account created successfully! Please log in.');
-        
-        if (context.canPop()) {
-          context.pop();
-        } else {
-          context.push(AppRoutes.login);
-        }
+        context.go(AppRoutes.login);
       }
     }
   }
@@ -536,6 +532,52 @@ class _SignupPageState extends ConsumerState<SignupPage> {
               }
               if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) {
                 return 'Please enter a valid email address';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 16),
+          // Phone Input
+          TextFormField(
+            controller: _phoneController,
+            keyboardType: TextInputType.phone,
+            enabled: !isLoading,
+            style: const TextStyle(color: AppColors.darkSlate, fontSize: 15),
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(10),
+            ],
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.phone_android_rounded, color: AppColors.iconGrey),
+              hintText: 'Phone number',
+              hintStyle: const TextStyle(color: AppColors.iconGrey),
+              filled: true,
+              fillColor: AppColors.white,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.lightGrey, width: 1.5),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.indigo, width: 2),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.errorRed, width: 1.5),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.errorRed, width: 2),
+              ),
+            ),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter your phone number';
+              }
+              final clean = value.replaceAll(RegExp(r'\D'), '');
+              if (clean.length != 10) {
+                return 'Phone number must be exactly 10 digits';
               }
               return null;
             },

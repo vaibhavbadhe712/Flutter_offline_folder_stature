@@ -71,14 +71,6 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
     final success = await ref.read(authProvider.notifier).sendOtp(widget.phoneNumber);
     if (success) {
       _startTimer();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('A new OTP has been sent via SMS.'),
-            backgroundColor: Color(0xFF4F46E5),
-          ),
-        );
-      }
     }
   }
 

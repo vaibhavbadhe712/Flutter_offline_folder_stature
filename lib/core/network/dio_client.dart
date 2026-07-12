@@ -156,7 +156,9 @@ class DioClient {
         return const ServerException(message: 'Security validation failed (SSL certificate mismatch).', statusCode: 495);
       case DioExceptionType.badResponse:
         if (data is Map) {
-          if (data.containsKey('message') && data['message'] != null) {
+          if (data.containsKey('detail') && data['detail'] != null) {
+            msg = data['detail'] as String;
+          } else if (data.containsKey('message') && data['message'] != null) {
             msg = data['message'] as String;
           } else if (data.containsKey('error') && data['error'] != null) {
             msg = data['error'] as String;

@@ -30,6 +30,7 @@ import '../../features/auth/domain/usecases/send_otp_usecase.dart' as _i663;
 import '../../features/auth/domain/usecases/send_reset_code_usecase.dart'
     as _i1069;
 import '../../features/auth/domain/usecases/verify_otp_usecase.dart' as _i503;
+import '../../features/auth/domain/usecases/signup_usecase.dart' as _i999;
 import '../config/app_config.dart' as _i650;
 import '../database/sync_engine.dart' as _i809;
 import '../network/auth_event_bus.dart' as _i702;
@@ -119,6 +120,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i503.VerifyOtpUseCase>(
       () => _i503.VerifyOtpUseCase(gh<_i787.AuthRepository>()),
+    );
+    gh.lazySingleton<_i999.SignupUseCase>(
+      () => _i999.SignupUseCase(gh<_i787.AuthRepository>()),
     );
     return this;
   }

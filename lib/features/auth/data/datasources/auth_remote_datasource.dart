@@ -1,5 +1,4 @@
 import '../../../../core/network/dio_client.dart';
-import '../../../../core/error/exceptions.dart';
 import 'package:injectable/injectable.dart';
 
 /// Protocol for the remote authorization datasource.
@@ -11,7 +10,7 @@ abstract class AuthRemoteDataSource {
   Future<void> logout();
 
   /// Request an OTP code.
-  Future<void> sendOtp(String phoneNumber);
+  Future<String> sendOtp(String phoneNumber);
 
   /// Verify OTP and return tokens + user.
   Future<Map<String, dynamic>> verifyOtp(String phoneNumber, String otp);
@@ -24,6 +23,14 @@ abstract class AuthRemoteDataSource {
     required String email,
     required String code,
     required String newPassword,
+  });
+
+  /// Sign up a new user.
+  Future<Map<String, dynamic>> signUp({
+    required String email,
+    required String password,
+    required String name,
+    required String phone,
   });
 }
 
@@ -39,31 +46,39 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await _dioClient.post(
-      '/auth/api/auth/login',
+      '/auth/login-password',
       data: {
         'email': email,
         'password': password,
-        'captchaToken': null,
       },
     );
 
     final responseData = response.data as Map<String, dynamic>;
-    final userJson = responseData['user'] as Map<String, dynamic>;
-    final firstName = userJson['first_name'] as String? ?? '';
-    final lastName = userJson['last_name'] as String? ?? '';
-    final name = '$firstName $lastName'.trim();
+    
+    // Support both nested 'user' object and root level user fields
+    final Map<String, dynamic> userJson = (responseData['user'] is Map)
+        ? responseData['user'] as Map<String, dynamic>
+        : responseData;
+
+    final firstName = userJson['first_name'] as String? ?? userJson['firstName'] as String? ?? '';
+    final lastName = userJson['last_name'] as String? ?? userJson['lastName'] as String? ?? '';
+    var name = userJson['name'] as String? ?? '';
+    if (name.isEmpty) {
+      name = '$firstName $lastName'.trim();
+    }
 
     final mappedUser = {
-      'id': userJson['id'] as String? ?? '',
+      'id': userJson['id'] as String? ?? userJson['userId'] as String? ?? userJson['_id'] as String? ?? '',
       'email': userJson['email'] as String? ?? '',
       'name': name.isEmpty ? 'BAAP AI User' : name,
-      'role': 'User',
+      'role': userJson['role'] as String? ?? 'User',
     };
 
     return {
       'user': mappedUser,
-      'access_token': responseData['access_token'] as String? ?? '',
-      'refresh_token': responseData['refresh_token'] as String? ?? '',
+      'access_token': responseData['access_token'] as String? ?? responseData['accessToken'] as String? ?? '',
+      'refresh_token': responseData['refresh_token'] as String? ?? responseData['refreshToken'] as String? ?? '',
+      'client_id': responseData['client_id'] as String? ?? '',
     };
   }
 
@@ -77,17 +92,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> sendOtp(String phoneNumber) async {
+  Future<String> sendOtp(String phoneNumber) async {
     // Extract the exact 10 digits (strip country code prefix like +91 and spaces)
     final cleanedPhone = phoneNumber.replaceAll(RegExp(r'\D'), '');
     final phone10Digits = cleanedPhone.length > 10
         ? cleanedPhone.substring(cleanedPhone.length - 10)
         : cleanedPhone;
 
-    await _dioClient.post(
-      '/auth/api/auth/request-otp',
+    final response = await _dioClient.post(
+      '/auth/request-otp',
       data: {'phone': phone10Digits},
     );
+    final responseData = response.data as Map<String, dynamic>;
+    return responseData['message'] as String? ?? 'OTP sent successfully';
   }
 
   @override
@@ -99,44 +116,44 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         : cleanedPhone;
 
     final response = await _dioClient.post(
-      '/auth/api/auth/verify-otp',
+      '/auth/verify-otp',
       data: {
         'phone': phone10Digits,
         'otp': otp,
-        'captchaToken': null,
       },
     );
 
     final responseData = response.data as Map<String, dynamic>;
-    final userJson = responseData['user'] as Map<String, dynamic>;
-    final firstName = userJson['first_name'] as String? ?? '';
-    final lastName = userJson['last_name'] as String? ?? '';
-    final name = '$firstName $lastName'.trim();
+    
+    // Support both nested 'user' object and root level user fields
+    final Map<String, dynamic> userJson = (responseData['user'] is Map)
+        ? responseData['user'] as Map<String, dynamic>
+        : responseData;
+
+    final firstName = userJson['first_name'] as String? ?? userJson['firstName'] as String? ?? '';
+    final lastName = userJson['last_name'] as String? ?? userJson['lastName'] as String? ?? '';
+    var name = userJson['name'] as String? ?? '';
+    if (name.isEmpty) {
+      name = '$firstName $lastName'.trim();
+    }
 
     final mappedUser = {
-      'id': userJson['id'] as String? ?? '',
+      'id': userJson['id'] as String? ?? userJson['userId'] as String? ?? userJson['_id'] as String? ?? '',
       'email': userJson['email'] as String? ?? '',
       'name': name.isEmpty ? 'BAAP AI User' : name,
-      'role': 'User',
+      'role': userJson['role'] as String? ?? 'User',
     };
 
     return {
       'user': mappedUser,
-      'access_token': responseData['access_token'] as String? ?? '',
-      'refresh_token': responseData['refresh_token'] as String? ?? '',
+      'access_token': responseData['access_token'] as String? ?? responseData['accessToken'] as String? ?? '',
+      'refresh_token': responseData['refresh_token'] as String? ?? responseData['refreshToken'] as String? ?? '',
+      'client_id': responseData['client_id'] as String? ?? '',
     };
   }
 
   @override
   Future<void> sendPasswordResetCode(String email) async {
-    if (_useMock) {
-      await Future.delayed(const Duration(seconds: 1));
-      if (email == 'error@company.com') {
-        throw const AuthException(message: 'No user found with this email address.');
-      }
-      return;
-    }
-
     await _dioClient.post(
       '/auth/forgot-password',
       data: {'email': email},
@@ -149,21 +166,33 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String code,
     required String newPassword,
   }) async {
-    if (_useMock) {
-      await Future.delayed(const Duration(seconds: 1));
-      if (code != '123456') {
-        throw const AuthException(message: 'Invalid verification code. Use 123456.');
-      }
-      return;
-    }
-
     await _dioClient.post(
       '/auth/reset-password',
       data: {
         'email': email,
-        'code': code,
-        'new_password': newPassword,
+        'otp': code,
+        'newPassword': newPassword,
       },
     );
+  }
+
+  @override
+  Future<Map<String, dynamic>> signUp({
+    required String email,
+    required String password,
+    required String name,
+    required String phone,
+  }) async {
+    final response = await _dioClient.post(
+      '/auth/signup',
+      data: {
+        'email': email,
+        'password': password,
+        'name': name,
+        'clientId': '3cdca960-1f63-4064-b832-a512799460f9',
+        'phone': phone,
+      },
+    );
+    return response.data as Map<String, dynamic>;
   }
 }

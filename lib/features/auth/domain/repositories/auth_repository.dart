@@ -17,7 +17,7 @@ abstract class AuthRepository {
   Future<Either<Failure, String>> refreshToken();
 
   /// Request an OTP code for phone login.
-  Future<Either<Failure, void>> sendOtp(String phoneNumber);
+  Future<Either<Failure, String>> sendOtp(String phoneNumber);
 
   /// Verify phone number and OTP code.
   Future<Either<Failure, UserEntity>> verifyOtp(String phoneNumber, String otp);
@@ -30,5 +30,12 @@ abstract class AuthRepository {
     required String email,
     required String code,
     required String newPassword,
+  });
+
+  Future<Either<Failure, void>> signUp({
+    required String email,
+    required String password,
+    required String name,
+    required String phone,
   });
 }

@@ -10,7 +10,9 @@ import '../../domain/usecases/send_otp_usecase.dart';
 import '../../domain/usecases/verify_otp_usecase.dart';
 import '../../domain/usecases/send_reset_code_usecase.dart';
 import '../../domain/usecases/reset_password_usecase.dart';
+import '../../domain/usecases/signup_usecase.dart';
 import '../state/auth_state.dart';
+import '../../../../core/utils/toast_services/toast_services.dart';
 
 /// StateNotifier that coordinates authentication actions (login, logout, checks) and updates screen state.
 class AuthNotifier extends StateNotifier<AuthState> {
@@ -21,6 +23,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final VerifyOtpUseCase verifyOtpUseCase;
   final SendResetCodeUseCase sendResetCodeUseCase;
   final ResetPasswordUseCase resetPasswordUseCase;
+  final SignupUseCase signupUseCase;
   final AuthEventBus authEventBus;
   StreamSubscription<AuthEvent>? eventSubscription;
 
@@ -32,6 +35,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required this.verifyOtpUseCase,
     required this.sendResetCodeUseCase,
     required this.resetPasswordUseCase,
+    required this.signupUseCase,
     required this.authEventBus,
   })  : super(const AuthState.initial()) {
     // Listen to global network-triggered logouts (e.g., failed refresh token)
@@ -68,7 +72,32 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
-  /// Request an OTP to the given phone number.
+  /// Perform sign up with email, password, name, and phone.
+  Future<bool> signUp({
+    required String email,
+    required String password,
+    required String name,
+    required String phone,
+  }) async {
+    state = const AuthState.loading();
+    final result = await signupUseCase(SignupParams(
+      email: email,
+      password: password,
+      name: name,
+      phone: phone,
+    ));
+    return result.fold(
+      (failure) {
+        state = AuthState.error(failure.message);
+        return false;
+      },
+      (_) {
+        state = const AuthState.unauthenticated();
+        return true;
+      },
+    );
+  }
+
   Future<bool> sendOtp(String phoneNumber) async {
     state = const AuthState.loading();
     final result = await sendOtpUseCase(phoneNumber);
@@ -77,8 +106,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = AuthState.error(failure.message);
         return false;
       },
-      (_) {
+      (message) {
         state = const AuthState.unauthenticated();
+        ToastServices.success('Success', message);
         return true;
       },
     );
@@ -163,6 +193,7 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
     verifyOtpUseCase: getIt<VerifyOtpUseCase>(),
     sendResetCodeUseCase: getIt<SendResetCodeUseCase>(),
     resetPasswordUseCase: getIt<ResetPasswordUseCase>(),
+    signupUseCase: getIt<SignupUseCase>(),
     authEventBus: getIt<AuthEventBus>(),
   );
 });

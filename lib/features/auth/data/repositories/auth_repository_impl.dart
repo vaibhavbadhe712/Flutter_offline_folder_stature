@@ -23,10 +23,14 @@ class AuthRepositoryImpl implements AuthRepository {
       final userModel = UserModel.fromJson(response['user'] as Map<String, dynamic>);
       final accessToken = response['access_token'] as String;
       final refreshToken = response['refresh_token'] as String;
+      final clientId = response['client_id'] as String?;
 
       // Persist locally
       await _localDataSource.saveTokens(accessToken, refreshToken);
       await _localDataSource.saveUser(userModel);
+      if (clientId != null && clientId.isNotEmpty) {
+        await _localDataSource.saveClientId(clientId);
+      }
 
       return Right(userModel.toEntity());
     } on ServerException catch (e) {
@@ -85,10 +89,10 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, void>> sendOtp(String phoneNumber) async {
+  Future<Either<Failure, String>> sendOtp(String phoneNumber) async {
     try {
-      await _remoteDataSource.sendOtp(phoneNumber);
-      return const Right(null);
+      final message = await _remoteDataSource.sendOtp(phoneNumber);
+      return Right(message);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode, errorData: e.errorData));
     } on NetworkException catch (e) {
@@ -108,10 +112,14 @@ class AuthRepositoryImpl implements AuthRepository {
       final userModel = UserModel.fromJson(response['user'] as Map<String, dynamic>);
       final accessToken = response['access_token'] as String;
       final refreshToken = response['refresh_token'] as String;
+      final clientId = response['client_id'] as String?;
 
       // Persist locally
       await _localDataSource.saveTokens(accessToken, refreshToken);
       await _localDataSource.saveUser(userModel);
+      if (clientId != null && clientId.isNotEmpty) {
+        await _localDataSource.saveClientId(clientId);
+      }
 
       return Right(userModel.toEntity());
     } on ServerException catch (e) {
@@ -158,6 +166,36 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(AuthFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure('An error occurred during password reset: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> signUp({
+    required String email,
+    required String password,
+    required String name,
+    required String phone,
+  }) async {
+    try {
+      await _remoteDataSource.signUp(
+        email: email,
+        password: password,
+        name: name,
+        phone: phone,
+      );
+
+      // Store clientId in local storage properly
+      await _localDataSource.saveClientId('3cdca960-1f63-4064-b832-a512799460f9');
+
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode, errorData: e.errorData));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure('An error occurred during signup: $e'));
     }
   }
 }
