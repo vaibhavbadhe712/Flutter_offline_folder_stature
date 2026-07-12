@@ -23,7 +23,7 @@ abstract class AuthRepository {
   Future<Either<Failure, UserEntity>> verifyOtp(String phoneNumber, String otp);
 
   /// Request a password reset code.
-  Future<Either<Failure, void>> sendPasswordResetCode(String email);
+  Future<Either<Failure, String>> sendPasswordResetCode(String email);
 
   /// Reset the password with code.
   Future<Either<Failure, void>> resetPassword({
