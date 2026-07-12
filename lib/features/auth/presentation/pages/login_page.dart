@@ -27,6 +27,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   bool _obscurePassword = true;
   String _currentLanguage = 'English';
 
+  void _switchTab(int tab) {
+    if (_selectedTab == tab) return;
+    setState(() {
+      _selectedTab = tab;
+      _phoneController.clear();
+      _emailController.clear();
+      _passwordController.clear();
+      _phoneFormKey.currentState?.reset();
+      _emailFormKey.currentState?.reset();
+    });
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -75,6 +87,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       appBar: AppBar(
         backgroundColor: AppColors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
         automaticallyImplyLeading: false,
         actions: [
           Padding(
@@ -265,7 +278,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         children: [
           Expanded(
             child: GestureDetector(
-              onTap: () => setState(() => _selectedTab = 0),
+              onTap: () => _switchTab(0),
               child: Container(
                 alignment: Alignment.center,
                 margin: const EdgeInsets.all(4),
@@ -295,7 +308,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           ),
           Expanded(
             child: GestureDetector(
-              onTap: () => setState(() => _selectedTab = 1),
+              onTap: () => _switchTab(1),
               child: Container(
                 alignment: Alignment.center,
                 margin: const EdgeInsets.all(4),
@@ -376,6 +389,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColors.lightGrey, width: 1.5),
               ),
+              disabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.lightGrey, width: 1.5),
+              ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColors.indigo, width: 2),
@@ -433,6 +450,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColors.lightGrey, width: 1.5),
               ),
+              disabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.lightGrey, width: 1.5),
+              ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColors.indigo, width: 2),
@@ -477,6 +498,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               fillColor: AppColors.white,
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.lightGrey, width: 1.5),
+              ),
+              disabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColors.lightGrey, width: 1.5),
               ),
