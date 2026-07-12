@@ -1,7 +1,6 @@
 import 'package:enterprise_app/features/widgets/ai_agent_shared.dart';
 import 'package:flutter/material.dart';
 import '../../core/utils/constants/app_colors.dart';
-import 'package:file_picker/file_picker.dart';
 
 class AiAgentSettingsScreen extends StatefulWidget {
   const AiAgentSettingsScreen({super.key});
@@ -38,15 +37,194 @@ class _AiAgentSettingsScreenState extends State<AiAgentSettingsScreen> {
   }
 
   Future<void> _pickFile() async {
-    final result = await FilePicker.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf', 'txt', 'doc', 'docx'],
+    final TextEditingController textController = TextEditingController();
+    final List<String> templates = [
+      'company_faqs.pdf',
+      'refund_policy.txt',
+      'product_catalog.pdf',
+      'user_onboarding_guide.docx',
+    ];
+
+    String? errorText;
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: AppColors.scaffoldBg,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: const Text(
+                'Add Knowledge Base Document',
+                style: TextStyle(
+                  color: AppColors.darkText,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              content: SizedBox(
+                width: 320,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Select a preset template or enter a custom file name to simulate document upload.',
+                      style: TextStyle(color: AppColors.greyText, fontSize: 13),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'PRESETS',
+                      style: TextStyle(
+                        color: AppColors.greyText,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: templates.map((template) {
+                        final isSelected = textController.text == template;
+                        return InkWell(
+                          onTap: () {
+                            setDialogState(() {
+                              textController.text = template;
+                              errorText = null;
+                            });
+                          },
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? AppColors.primaryBlue.withValues(alpha: 0.1)
+                                  : AppColors.lightGreyColor.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: isSelected
+                                    ? AppColors.primaryBlue
+                                    : Colors.transparent,
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              template,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isSelected
+                                    ? AppColors.primaryBlue
+                                    : AppColors.darkText,
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'CUSTOM FILE NAME',
+                      style: TextStyle(
+                        color: AppColors.greyText,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: textController,
+                      style: const TextStyle(fontSize: 14, color: AppColors.darkText),
+                      decoration: InputDecoration(
+                        hintText: 'Enter file name (e.g. document.pdf)',
+                        hintStyle: const TextStyle(color: AppColors.iconGrey, fontSize: 13),
+                        contentPadding: const EdgeInsets.all(12),
+                        errorText: errorText,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: AppColors.lightGreyColor),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: AppColors.lightGreyColor),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: AppColors.primaryBlue),
+                        ),
+                      ),
+                      onChanged: (val) {
+                        if (errorText != null) {
+                          setDialogState(() {
+                            errorText = null;
+                          });
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: AppColors.greyText, fontWeight: FontWeight.w600),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    final name = textController.text.trim();
+                    if (name.isEmpty) {
+                      setDialogState(() {
+                        errorText = 'Please enter or select a file name';
+                      });
+                      return;
+                    }
+                    // Validate extension
+                    final hasValidExt = ['.pdf', '.txt', '.doc', '.docx'].any(
+                      (ext) => name.toLowerCase().endsWith(ext),
+                    );
+                    if (!hasValidExt) {
+                      setDialogState(() {
+                        errorText = 'Extension must be .pdf, .txt, .doc, or .docx';
+                      });
+                      return;
+                    }
+
+                    setState(() {
+                      _uploadedFiles.add(name);
+                    });
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryBlue,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  ),
+                  child: const Text(
+                    'Add',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
-    if (result != null) {
-      setState(() {
-        _uploadedFiles.add(result.files.single.name);
-      });
-    }
   }
 
   void _toggleIntent(String label) {

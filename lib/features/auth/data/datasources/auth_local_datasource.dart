@@ -16,6 +16,8 @@ abstract class AuthLocalDataSource {
 
   /// Reset all stored session parameters (tokens and cached user data).
   Future<void> clearSession();
+  /// Save client id locally.
+  Future<void> saveClientId(String clientId);
 }
 
 @LazySingleton(as: AuthLocalDataSource)
@@ -51,5 +53,11 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   @override
   Future<void> clearSession() async {
     await _secureStorage.clearAll();
+  }
+
+  @override
+  Future<void> saveClientId(String clientId) async {
+    await _secureStorage.saveSelectedClient(clientId, 'BAAP AI Workspace');
+    print("DEBUG: AuthLocalDataSource.saveClientId: Saved client ID: $clientId");
   }
 }
