@@ -125,17 +125,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   /// Send password reset code to email.
-  Future<bool> sendPasswordResetCode(String email) async {
+  Future<String?> sendPasswordResetCode(String email) async {
     state = const AuthState.loading();
     final result = await sendResetCodeUseCase(email);
     return result.fold(
       (failure) {
         state = AuthState.error(failure.message);
-        return false;
+        return null;
       },
-      (_) {
+      (message) {
         state = const AuthState.unauthenticated();
-        return true;
+        return message;
       },
     );
   }

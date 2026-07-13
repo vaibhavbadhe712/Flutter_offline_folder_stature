@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../state/auth_state.dart';
 import '../../../../core/utils/constants/app_colors.dart';
+import '../../../../core/utils/toast_services/toast_services.dart';
 
 class ResetPasswordPage extends ConsumerStatefulWidget {
   final String email;
@@ -54,18 +55,13 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
     if (_requestFormKey.currentState?.validate() ?? false) {
       final phone = _phoneController.text.trim();
       final fullPhoneNumber = '+91 $phone';
-      final success = await ref.read(authProvider.notifier).sendPasswordResetCode(fullPhoneNumber);
-      if (success && mounted) {
+      final message = await ref.read(authProvider.notifier).sendPasswordResetCode(fullPhoneNumber);
+      if (message != null && mounted) {
         setState(() {
           _phoneNumber = fullPhoneNumber;
           _codeSent = true;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Verification code sent!'),
-            backgroundColor: AppColors.indigo,
-          ),
-        );
+        ToastServices.success('Success', message);
       }
     }
   }

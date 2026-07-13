@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../state/auth_state.dart';
+import '../../../../core/utils/toast_services/toast_services.dart';
 import '../../../../core/utils/constants/app_colors.dart';
 
 class ForgotPasswordPage extends ConsumerStatefulWidget {
@@ -26,14 +27,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   void _submit() async {
     if (_formKey.currentState?.validate() ?? false) {
       final email = _emailController.text.trim();
-      final success = await ref.read(authProvider.notifier).sendPasswordResetCode(email);
-      if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Verification code sent! Please check your email.'),
-            backgroundColor: AppColors.indigo,
-          ),
-        );
+      final message = await ref.read(authProvider.notifier).sendPasswordResetCode(email);
+      if (message != null && mounted) {
+        ToastServices.success('Success', message);
         context.go('/reset-password?email=$email');
       }
     }

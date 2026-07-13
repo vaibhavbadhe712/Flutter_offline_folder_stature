@@ -134,10 +134,10 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, void>> sendPasswordResetCode(String email) async {
+  Future<Either<Failure, String>> sendPasswordResetCode(String email) async {
     try {
-      await _remoteDataSource.sendPasswordResetCode(email);
-      return const Right(null);
+      final message = await _remoteDataSource.sendPasswordResetCode(email);
+      return Right(message);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode, errorData: e.errorData));
     } on NetworkException catch (e) {

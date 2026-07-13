@@ -16,7 +16,7 @@ abstract class AuthRemoteDataSource {
   Future<Map<String, dynamic>> verifyOtp(String phoneNumber, String otp);
 
   /// Send password reset code.
-  Future<void> sendPasswordResetCode(String email);
+  Future<String> sendPasswordResetCode(String email);
 
   /// Set new password with code.
   Future<void> resetPassword({
@@ -153,11 +153,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> sendPasswordResetCode(String email) async {
-    await _dioClient.post(
+  Future<String> sendPasswordResetCode(String email) async {
+    final response = await _dioClient.post(
       '/auth/forgot-password',
       data: {'email': email},
     );
+    final responseData = response.data as Map<String, dynamic>;
+    return responseData['message'] as String? ?? 'Verification code sent!';
   }
 
   @override
