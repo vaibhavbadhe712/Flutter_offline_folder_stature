@@ -117,6 +117,7 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF0F172A)),
           onPressed: () => context.go('/login'),
@@ -348,6 +349,10 @@ class _OtpVerificationPageState extends ConsumerState<OtpVerificationPage> {
             filled: true,
             fillColor: Colors.white,
             enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+            ),
+            disabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
             ),

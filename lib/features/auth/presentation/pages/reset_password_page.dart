@@ -110,6 +110,7 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
       appBar: AppBar(
         backgroundColor: AppColors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
         automaticallyImplyLeading: false,
         actions: [
           Padding(
@@ -210,6 +211,11 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(10),
             ],
+            onChanged: (value) {
+              if (value.length == 10) {
+                FocusScope.of(context).unfocus();
+              }
+            },
             decoration: InputDecoration(
               prefixIcon: Row(
                 mainAxisSize: MainAxisSize.min,

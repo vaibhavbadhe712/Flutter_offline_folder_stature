@@ -30,6 +30,19 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   String _currentLanguage = 'English';
   bool _isMockLoading = false;
 
+  void _switchTab(int tab) {
+    if (_selectedTab == tab) return;
+    setState(() {
+      _selectedTab = tab;
+      _fullNameController.clear();
+      _phoneController.clear();
+      _emailController.clear();
+      _passwordController.clear();
+      _phoneFormKey.currentState?.reset();
+      _emailFormKey.currentState?.reset();
+    });
+  }
+
   @override
   void dispose() {
     _fullNameController.dispose();
@@ -102,6 +115,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
       appBar: AppBar(
         backgroundColor: AppColors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
         automaticallyImplyLeading: false,
         actions: [
           Padding(
@@ -282,7 +296,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
         children: [
           Expanded(
             child: GestureDetector(
-              onTap: () => setState(() => _selectedTab = 0),
+              onTap: () => _switchTab(0),
               child: Container(
                 alignment: Alignment.center,
                 margin: const EdgeInsets.all(4),
@@ -312,7 +326,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
           ),
           Expanded(
             child: GestureDetector(
-              onTap: () => setState(() => _selectedTab = 1),
+              onTap: () => _switchTab(1),
               child: Container(
                 alignment: Alignment.center,
                 margin: const EdgeInsets.all(4),
@@ -368,6 +382,10 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColors.lightGrey, width: 1.5),
               ),
+              disabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.lightGrey, width: 1.5),
+              ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColors.indigo, width: 2),
@@ -402,6 +420,11 @@ class _SignupPageState extends ConsumerState<SignupPage> {
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(10),
             ],
+            onChanged: (value) {
+              if (value.length == 10) {
+                FocusScope.of(context).unfocus();
+              }
+            },
             decoration: InputDecoration(
               prefixIcon: const Icon(Icons.phone_android_rounded, color: AppColors.iconGrey),
               hintText: '+91 98765 43210',
@@ -410,6 +433,10 @@ class _SignupPageState extends ConsumerState<SignupPage> {
               fillColor: AppColors.white,
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.lightGrey, width: 1.5),
+              ),
+              disabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColors.lightGrey, width: 1.5),
               ),
@@ -472,6 +499,10 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColors.lightGrey, width: 1.5),
               ),
+              disabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.lightGrey, width: 1.5),
+              ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColors.indigo, width: 2),
@@ -513,6 +544,10 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColors.lightGrey, width: 1.5),
               ),
+              disabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.lightGrey, width: 1.5),
+              ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColors.indigo, width: 2),
@@ -547,6 +582,11 @@ class _SignupPageState extends ConsumerState<SignupPage> {
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(10),
             ],
+            onChanged: (value) {
+              if (value.length == 10) {
+                FocusScope.of(context).unfocus();
+              }
+            },
             decoration: InputDecoration(
               prefixIcon: const Icon(Icons.phone_android_rounded, color: AppColors.iconGrey),
               hintText: 'Phone number',
@@ -555,6 +595,10 @@ class _SignupPageState extends ConsumerState<SignupPage> {
               fillColor: AppColors.white,
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.lightGrey, width: 1.5),
+              ),
+              disabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColors.lightGrey, width: 1.5),
               ),
@@ -604,6 +648,10 @@ class _SignupPageState extends ConsumerState<SignupPage> {
               fillColor: AppColors.white,
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.lightGrey, width: 1.5),
+              ),
+              disabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColors.lightGrey, width: 1.5),
               ),
