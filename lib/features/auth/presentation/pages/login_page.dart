@@ -356,6 +356,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(10),
             ],
+            onChanged: (value) {
+              if (value.length == 10) {
+                FocusScope.of(context).unfocus();
+              }
+            },
             decoration: InputDecoration(
               prefixIcon: Row(
                 mainAxisSize: MainAxisSize.min,
