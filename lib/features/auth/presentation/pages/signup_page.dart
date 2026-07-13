@@ -420,6 +420,11 @@ class _SignupPageState extends ConsumerState<SignupPage> {
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(10),
             ],
+            onChanged: (value) {
+              if (value.length == 10) {
+                FocusScope.of(context).unfocus();
+              }
+            },
             decoration: InputDecoration(
               prefixIcon: const Icon(Icons.phone_android_rounded, color: AppColors.iconGrey),
               hintText: '+91 98765 43210',
@@ -577,6 +582,11 @@ class _SignupPageState extends ConsumerState<SignupPage> {
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(10),
             ],
+            onChanged: (value) {
+              if (value.length == 10) {
+                FocusScope.of(context).unfocus();
+              }
+            },
             decoration: InputDecoration(
               prefixIcon: const Icon(Icons.phone_android_rounded, color: AppColors.iconGrey),
               hintText: 'Phone number',
