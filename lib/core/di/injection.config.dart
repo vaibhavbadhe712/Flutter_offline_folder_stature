@@ -31,6 +31,14 @@ import '../../features/auth/domain/usecases/send_reset_code_usecase.dart'
     as _i1069;
 import '../../features/auth/domain/usecases/signup_usecase.dart' as _i57;
 import '../../features/auth/domain/usecases/verify_otp_usecase.dart' as _i503;
+import '../../features/calls/data/datasources/calls_remote_datasource.dart'
+    as _i903;
+import '../../features/calls/data/repositories/calls_repository_impl.dart'
+    as _i722;
+import '../../features/calls/domain/repositories/calls_repository.dart'
+    as _i1032;
+import '../../features/calls/domain/usecases/get_outbound_phone_numbers_usecase.dart'
+    as _i398;
 import '../../features/dashboard/data/datasources/dashboard_remote_datasource.dart'
     as _i817;
 import '../../features/dashboard/data/repositories/dashboard_repository_impl.dart'
@@ -106,11 +114,20 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i509.DashboardRepositoryImpl(gh<_i817.DashboardRemoteDataSource>()),
     );
+    gh.lazySingleton<_i903.CallsRemoteDataSource>(
+      () => _i903.CallsRemoteDataSourceImpl(gh<_i667.DioClient>()),
+    );
     gh.lazySingleton<_i161.AuthRemoteDataSource>(
       () => _i161.AuthRemoteDataSourceImpl(gh<_i667.DioClient>()),
     );
     gh.lazySingleton<_i512.GetDashboardMetricsUseCase>(
       () => _i512.GetDashboardMetricsUseCase(gh<_i665.DashboardRepository>()),
+    );
+    gh.lazySingleton<_i1032.CallsRepository>(
+      () => _i722.CallsRepositoryImpl(gh<_i903.CallsRemoteDataSource>()),
+    );
+    gh.lazySingleton<_i398.GetOutboundPhoneNumbersUseCase>(
+      () => _i398.GetOutboundPhoneNumbersUseCase(gh<_i1032.CallsRepository>()),
     );
     gh.lazySingleton<_i787.AuthRepository>(
       () => _i153.AuthRepositoryImpl(
