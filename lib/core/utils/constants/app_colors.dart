@@ -164,4 +164,23 @@ class AppColors {
   static const Color statusNegativeText = Color(0xFFB91C1C);
 
   static const Color fieldBorderColor = Color(0xFFE2E8F0);
+
+  // Stat Card Colors
+  static const Color statCardCallsIcon = Color(0xFF4F46E5);
+  static const Color statCardCallsBg = Color(0xFFEEF2FF);
+  
+  static const Color statCardAgentsIcon = Color(0xFFD97706);
+  static const Color statCardAgentsBg = Color(0xFFFEF3C7);
+  
+  static const Color statCardMinutesIcon = Color(0xFF0EA5E9);
+  static const Color statCardMinutesBg = Color(0xFFE0F2FE);
+  
+  static const Color statCardSpendIcon = Color(0xFF10B981);
+  static const Color statCardSpendBg = Color(0xFFECFDF5);
+
+  static const Color statCardTitle = Color(0xFF94A3B8);
+  static const Color statCardValue = Color(0xFF1E293B);
+  static const Color statCardBorder = Color(0xFFF1F5F9);
+  static const Color statCardIconDefault = Color(0xFF64748B);
+  static const Color statCardIconBgDefault = Color(0xFFF1F5F9);
 }
