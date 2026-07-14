@@ -4,6 +4,8 @@ import '../../../../core/database/sync_engine.dart';
 import '../../../../core/di/injection.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../widgets/activity_list_item.dart';
+import '../../../../core/utils/constants/app_colors.dart';
+import '../providers/dashboard_metrics_provider.dart';
 
 final timeframeProvider = StateProvider<String>((ref) => '7 Days');
 
@@ -171,35 +173,64 @@ class DashboardPage extends ConsumerWidget {
             // Stat Cards Horizontal List
             SizedBox(
               height: 152,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                children: [
-                  _buildStatCard(
-                    icon: Icons.phone_in_talk_outlined,
-                    iconColor: const Color(0xFF4F46E5),
-                    iconBgColor: const Color(0xFFEEF2FF),
-                    title: 'Voice Calls Made',
-                    value: '1,284',
-                    subtext: '8,940 min total',
+              child: ref.watch(dashboardMetricsProvider).when(
+                initial: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (message) => Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Error: $message',
+                        style: const TextStyle(color: AppColors.errorRed, fontSize: 12),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 4),
+                      TextButton(
+                        onPressed: () => ref.read(dashboardMetricsProvider.notifier).fetchMetrics(),
+                        child: const Text('Retry', style: TextStyle(fontSize: 12)),
+                      ),
+                    ],
                   ),
-                  _buildStatCard(
-                    icon: Icons.credit_card_outlined,
-                    iconColor: const Color(0xFF10B981),
-                    iconBgColor: const Color(0xFFECFDF5),
-                    title: 'Amount Spent',
-                    value: '₹18,430',
-                    subtext: 'All campaigns',
-                  ),
-                  _buildStatCard(
-                    icon: Icons.smart_toy_outlined,
-                    iconColor: const Color(0xFFF59E0B),
-                    iconBgColor: const Color(0xFFFEF3C7),
-                    title: 'AI Calls',
-                    value: '946',
-                    subtext: '73.6% connection',
-                  ),
-                ],
+                ),
+                loaded: (metrics) {
+                  final formattedSpend = _formatSpend(metrics.totalSpendLocal, metrics.currency);
+
+                  return ListView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    children: [
+                      _buildStatCard(
+                        icon: Icons.phone_outlined,
+                        iconColor: AppColors.statCardCallsIcon,
+                        iconBgColor: AppColors.statCardCallsBg,
+                        title: 'Total Calls',
+                        value: '${metrics.totalCalls}',
+                      ),
+                      _buildStatCard(
+                        icon: Icons.smart_toy_outlined,
+                        iconColor: AppColors.statCardAgentsIcon,
+                        iconBgColor: AppColors.statCardAgentsBg,
+                        title: 'Active Agents',
+                        value: '${metrics.activeAssistants}',
+                      ),
+                      _buildStatCard(
+                        icon: Icons.access_time_outlined,
+                        iconColor: AppColors.statCardMinutesIcon,
+                        iconBgColor: AppColors.statCardMinutesBg,
+                        title: 'Total Minutes',
+                        value: '${metrics.totalMinutes.toInt()}',
+                      ),
+                      _buildStatCard(
+                        icon: _getCurrencyIcon(metrics.currency),
+                        iconColor: AppColors.statCardSpendIcon,
+                        iconBgColor: AppColors.statCardSpendBg,
+                        title: 'Total Spend',
+                        value: formattedSpend,
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
             const SizedBox(height: 24),
@@ -378,72 +409,112 @@ class DashboardPage extends ConsumerWidget {
     );
   }
 
+  IconData _getCurrencyIcon(String currency) {
+    switch (currency.toUpperCase()) {
+      case 'INR':
+        return Icons.currency_rupee_outlined;
+      case 'EUR':
+        return Icons.euro_outlined;
+      case 'GBP':
+        return Icons.currency_pound_outlined;
+      case 'USD':
+      default:
+        return Icons.attach_money_outlined;
+    }
+  }
+
+  String _formatSpend(double amount, String currency) {
+    switch (currency.toUpperCase()) {
+      case 'INR':
+        return '₹${amount.toStringAsFixed(2)}';
+      case 'EUR':
+        return '€${amount.toStringAsFixed(2)}';
+      case 'GBP':
+        return '£${amount.toStringAsFixed(2)}';
+      case 'USD':
+      default:
+        return '\$${amount.toStringAsFixed(2)}';
+    }
+  }
+
   Widget _buildStatCard({
     required IconData icon,
-    required Color iconColor,
-    required Color iconBgColor,
     required String title,
     required String value,
-    required String subtext,
+    Color iconColor = AppColors.statCardIconDefault,
+    Color iconBgColor = AppColors.statCardIconBgDefault,
+    String subtext = '',
   }) {
     return Container(
-      width: 156,
+      width: 172,
       margin: const EdgeInsets.only(right: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        border: Border.all(color: AppColors.statCardBorder, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.015),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.01),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: iconBgColor,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, color: iconColor, size: 20),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.statCardTitle,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: iconBgColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: Icon(icon, color: iconColor, size: 20),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Color(0xFF64748B),
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 4),
+          const Spacer(),
           Text(
             value,
             style: const TextStyle(
-              color: Color(0xFF0F172A),
-              fontSize: 20,
+              color: AppColors.statCardValue,
+              fontSize: 28,
               fontWeight: FontWeight.bold,
             ),
           ),
+          if (subtext.isNotEmpty) ...[
           const SizedBox(height: 2),
           Text(
             subtext,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              color: Color(0xFF94A3B8),
+              color: AppColors.statCardTitle,
               fontSize: 11,
               fontWeight: FontWeight.w400,
             ),
           ),
+          ],
         ],
       ),
     );

@@ -29,8 +29,16 @@ import '../../features/auth/domain/usecases/reset_password_usecase.dart'
 import '../../features/auth/domain/usecases/send_otp_usecase.dart' as _i663;
 import '../../features/auth/domain/usecases/send_reset_code_usecase.dart'
     as _i1069;
+import '../../features/auth/domain/usecases/signup_usecase.dart' as _i57;
 import '../../features/auth/domain/usecases/verify_otp_usecase.dart' as _i503;
-import '../../features/auth/domain/usecases/signup_usecase.dart' as _i999;
+import '../../features/dashboard/data/datasources/dashboard_remote_datasource.dart'
+    as _i817;
+import '../../features/dashboard/data/repositories/dashboard_repository_impl.dart'
+    as _i509;
+import '../../features/dashboard/domain/repositories/dashboard_repository.dart'
+    as _i665;
+import '../../features/dashboard/domain/usecases/get_dashboard_metrics_usecase.dart'
+    as _i512;
 import '../config/app_config.dart' as _i650;
 import '../database/sync_engine.dart' as _i809;
 import '../network/auth_event_bus.dart' as _i702;
@@ -55,14 +63,14 @@ extension GetItInjectableX on _i174.GetIt {
       () => registerModule.prefs,
       preResolve: true,
     );
+    gh.lazySingleton<_i650.AppConfig>(() => _i650.AppConfig());
+    gh.lazySingleton<_i702.AuthEventBus>(() => _i702.AuthEventBus());
     gh.lazySingleton<_i344.LoggingInterceptor>(
       () => _i344.LoggingInterceptor(),
     );
-    gh.lazySingleton<_i702.AuthEventBus>(() => _i702.AuthEventBus());
     gh.lazySingleton<_i666.SecureStorageService>(
       () => _i666.SecureStorageService(),
     );
-    gh.lazySingleton<_i650.AppConfig>(() => _i650.AppConfig());
     gh.lazySingleton<_i636.PreferencesService>(
       () => _i636.PreferencesService(gh<_i460.SharedPreferences>()),
     );
@@ -91,8 +99,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i344.LoggingInterceptor>(),
       ),
     );
+    gh.lazySingleton<_i817.DashboardRemoteDataSource>(
+      () => _i817.DashboardRemoteDataSourceImpl(gh<_i667.DioClient>()),
+    );
+    gh.lazySingleton<_i665.DashboardRepository>(
+      () =>
+          _i509.DashboardRepositoryImpl(gh<_i817.DashboardRemoteDataSource>()),
+    );
     gh.lazySingleton<_i161.AuthRemoteDataSource>(
       () => _i161.AuthRemoteDataSourceImpl(gh<_i667.DioClient>()),
+    );
+    gh.lazySingleton<_i512.GetDashboardMetricsUseCase>(
+      () => _i512.GetDashboardMetricsUseCase(gh<_i665.DashboardRepository>()),
     );
     gh.lazySingleton<_i787.AuthRepository>(
       () => _i153.AuthRepositoryImpl(
@@ -100,17 +118,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i992.AuthLocalDataSource>(),
       ),
     );
+    gh.lazySingleton<_i17.GetCurrentUserUseCase>(
+      () => _i17.GetCurrentUserUseCase(gh<_i787.AuthRepository>()),
+    );
     gh.lazySingleton<_i188.LoginUseCase>(
       () => _i188.LoginUseCase(gh<_i787.AuthRepository>()),
     );
     gh.lazySingleton<_i48.LogoutUseCase>(
       () => _i48.LogoutUseCase(gh<_i787.AuthRepository>()),
-    );
-    gh.lazySingleton<_i17.GetCurrentUserUseCase>(
-      () => _i17.GetCurrentUserUseCase(gh<_i787.AuthRepository>()),
-    );
-    gh.lazySingleton<_i1069.SendResetCodeUseCase>(
-      () => _i1069.SendResetCodeUseCase(gh<_i787.AuthRepository>()),
     );
     gh.lazySingleton<_i474.ResetPasswordUseCase>(
       () => _i474.ResetPasswordUseCase(gh<_i787.AuthRepository>()),
@@ -118,11 +133,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i663.SendOtpUseCase>(
       () => _i663.SendOtpUseCase(gh<_i787.AuthRepository>()),
     );
+    gh.lazySingleton<_i1069.SendResetCodeUseCase>(
+      () => _i1069.SendResetCodeUseCase(gh<_i787.AuthRepository>()),
+    );
+    gh.lazySingleton<_i57.SignupUseCase>(
+      () => _i57.SignupUseCase(gh<_i787.AuthRepository>()),
+    );
     gh.lazySingleton<_i503.VerifyOtpUseCase>(
       () => _i503.VerifyOtpUseCase(gh<_i787.AuthRepository>()),
-    );
-    gh.lazySingleton<_i999.SignupUseCase>(
-      () => _i999.SignupUseCase(gh<_i787.AuthRepository>()),
     );
     return this;
   }
