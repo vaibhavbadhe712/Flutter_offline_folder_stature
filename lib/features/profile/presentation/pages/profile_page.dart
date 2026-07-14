@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import '../../../../core/navigation/app_routes.dart';
+import '../../../../core/utils/toast_services/toast_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -160,7 +161,56 @@ class ProfilePage extends ConsumerWidget {
               ),
               child: InkWell(
                 onTap: () {
-                  ref.read(authProvider.notifier).logout();
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text(
+                          'Log out?',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.darkText,
+                          ),
+                        ),
+                        content: const Text(
+                          'Are you sure you want to log out from your account?',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.greyText,
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text(
+                              'Cancel',
+                              style: TextStyle(
+                                color: AppColors.primaryBlue,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              ref.read(authProvider.notifier).logout();
+                              ToastServices.success('Success', 'Logged out successfully');
+                            },
+                            child: const Text(
+                              'Log out',
+                              style: TextStyle(
+                                color: AppColors.errorRed,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
                 },
                 borderRadius: BorderRadius.circular(16),
                 child: Row(
