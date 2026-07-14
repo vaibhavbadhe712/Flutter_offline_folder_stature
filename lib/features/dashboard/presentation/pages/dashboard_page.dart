@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/database/sync_engine.dart';
-import '../../../../core/di/injection.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../widgets/activity_list_item.dart';
 
@@ -302,74 +300,6 @@ class DashboardPage extends ConsumerWidget {
                   statusBgColor: const Color(0xFFD1FAE5),
                 ),
               ],
-            ),
-            const SizedBox(height: 20),
-
-            // Offline Sync Panel Card (Developer Utilities)
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: const BorderSide(color: Color(0xFFE2E8F0)),
-              ),
-              color: Colors.white,
-              child: ExpansionTile(
-                title: const Text(
-                  'Offline Sync Control Unit',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF475569)),
-                ),
-                leading: const Icon(Icons.sync_problem, color: Color(0xFF475569)),
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
-                    child: Column(
-                      children: [
-                        ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(40),
-                            backgroundColor: const Color(0xFF4F46E5),
-                            foregroundColor: Colors.white,
-                          ),
-                          icon: const Icon(Icons.add, size: 18),
-                          label: const Text('Simulate Offline Mutation Request'),
-                          onPressed: () async {
-                            await getIt<SyncEngine>().enqueueMutation(
-                              endpoint: '/trips/create',
-                              method: 'POST',
-                              payload: {
-                                'trip_id': 'TRP-10922',
-                                'timestamp': DateTime.now().toIso8601String(),
-                                'destination': 'Headquarters Office',
-                              },
-                            );
-                            if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Mock mutation added to local Sync Queue.')),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 8),
-                        OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(40),
-                            side: const BorderSide(color: Color(0xFF4F46E5)),
-                            foregroundColor: const Color(0xFF4F46E5),
-                          ),
-                          icon: const Icon(Icons.sync, size: 18),
-                          label: const Text('Process Sync Queue Now'),
-                          onPressed: () async {
-                            await getIt<SyncEngine>().processQueue();
-                            if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Offline sync execution triggered.')),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
             ),
             const SizedBox(height: 20),
           ],
