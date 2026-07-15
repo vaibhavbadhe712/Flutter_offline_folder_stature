@@ -8,6 +8,9 @@ import '../../../widgets/segmented_toggle.dart';
 import '../providers/outbound_phone_numbers_provider.dart';
 import '../state/outbound_phone_numbers_state.dart';
 import '../../domain/entities/phone_number_entity.dart';
+import '../providers/assistants_provider.dart';
+import '../state/assistants_state.dart';
+import '../../domain/entities/assistant_entity.dart';
 
 class _CampaignEntry {
   const _CampaignEntry({
@@ -80,8 +83,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
 
   PhoneNumberEntity? _selectedOutbound;
 
-  final List<String> _assistantsList = ['admission', 'support_bot', 'sales_bot'];
-  late String _selectedAssistant = _assistantsList[0];
+  String? _selectedAssistant;
 
   final List<Map<String, String>> _contacts = [
     {'name': 'Aniket gagare', 'number': '+918208149357'},
@@ -108,6 +110,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
   @override
   Widget build(BuildContext context) {
     final outboundState = ref.watch(outboundPhoneNumbersProvider);
+    final assistantsState = ref.watch(assistantsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.whiteColor,
@@ -123,7 +126,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.black),
               ),
               const SizedBox(height: 16),
-              CustomCard(child: _buildCallForm(outboundState)),
+              CustomCard(child: _buildCallForm(outboundState, assistantsState)),
               const SizedBox(height: 24),
               const Text(
                 'Live Progress Monitor',
@@ -174,7 +177,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
     );
   }
 
-  Widget _buildCallForm(OutboundPhoneNumbersState outboundState) {
+  Widget _buildCallForm(OutboundPhoneNumbersState outboundState, AssistantsState assistantsState) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -194,7 +197,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
           const SizedBox(height: 8),
           _buildAgentDropdown(),
         ] else ...[
-          ..._buildSingleFields(outboundState),
+          ..._buildSingleFields(outboundState, assistantsState),
         ],
         const SizedBox(height: 24),
         _buildStartButton(),
@@ -202,7 +205,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
     );
   }
 
-  List<Widget> _buildSingleFields(OutboundPhoneNumbersState state) {
+  List<Widget> _buildSingleFields(OutboundPhoneNumbersState state, AssistantsState assistantsState) {
     return [
       const Text(
         'SINGLE TEST CALL',
@@ -298,11 +301,69 @@ class _CallsPageState extends ConsumerState<CallsPage> {
       // 2. Assistant Field
       _buildFieldLabel(Icons.radio_button_unchecked_outlined, 'Assistant'),
       const SizedBox(height: 8),
-      _buildDropdownField<String>(
-        value: _selectedAssistant,
-        items: _buildAssistantItems(),
-        onChanged: (val) {
-          if (val != null) setState(() => _selectedAssistant = val);
+      assistantsState.when(
+        initial: () => const Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 16.0),
+            child: CircularProgressIndicator(),
+          ),
+        ),
+        loading: () => const Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 16.0),
+            child: CircularProgressIndicator(),
+          ),
+        ),
+        error: (message) => Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFEF2F2),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFFCA5A5)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Error loading assistants: $message',
+                style: const TextStyle(color: Color(0xFF991B1B), fontSize: 13),
+              ),
+              const SizedBox(height: 4),
+              TextButton(
+                onPressed: () => ref.read(assistantsProvider.notifier).fetchAssistants(),
+                style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
+                child: const Text('Retry', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFDC2626))),
+              ),
+            ],
+          ),
+        ),
+        loaded: (assistants) {
+          if (assistants.isEmpty) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16.0),
+              child: Text(
+                'No assistants configured',
+                style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+              ),
+            );
+          }
+
+          // Safe dynamic fallback to avoid build error
+          if (_selectedAssistant == null || !assistants.any((item) => item.name == _selectedAssistant)) {
+            _selectedAssistant = assistants.first.name;
+          } else {
+            // Re-match reference
+            _selectedAssistant = assistants.firstWhere((item) => item.name == _selectedAssistant).name;
+          }
+
+          return _buildDropdownField<String>(
+            value: _selectedAssistant!,
+            items: _buildAssistantItems(assistants),
+            onChanged: (val) {
+              if (val != null) setState(() => _selectedAssistant = val);
+            },
+          );
         },
       ),
       const SizedBox(height: 16),
@@ -399,6 +460,10 @@ class _CallsPageState extends ConsumerState<CallsPage> {
           } else {
             if (_selectedOutbound == null) {
               _showSnack('Please select an outbound phone number line.');
+              return;
+            }
+            if (_selectedAssistant == null) {
+              _showSnack('Please select an assistant.');
               return;
             }
             _showSnack(
@@ -517,14 +582,14 @@ class _CallsPageState extends ConsumerState<CallsPage> {
     }).toList();
   }
 
-  List<DropdownMenuItem<String>> _buildAssistantItems() {
-    return _assistantsList.map((item) {
+  List<DropdownMenuItem<String>> _buildAssistantItems(List<AssistantEntity> assistants) {
+    return assistants.map((item) {
       return DropdownMenuItem(
-        value: item,
+        value: item.name,
         child: Align(
           alignment: Alignment.centerLeft,
           child: Text(
-            item,
+            item.name,
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,

@@ -1,9 +1,15 @@
 import '../../../../core/network/dio_client.dart';
 import '../models/phone_number_model.dart';
+import '../models/assistant_model.dart';
 import 'package:injectable/injectable.dart';
 
 abstract class CallsRemoteDataSource {
   Future<List<PhoneNumberModel>> getOutboundPhoneNumbers({
+    required String clientId,
+    required String userId,
+  });
+
+  Future<List<AssistantModel>> getAssistants({
     required String clientId,
     required String userId,
   });
@@ -26,5 +32,18 @@ class CallsRemoteDataSourceImpl implements CallsRemoteDataSource {
     
     final list = response.data as List<dynamic>;
     return list.map((json) => PhoneNumberModel.fromJson(json as Map<String, dynamic>)).toList();
+  }
+
+  @override
+  Future<List<AssistantModel>> getAssistants({
+    required String clientId,
+    required String userId,
+  }) async {
+    final path = '/api/assistants/client/$clientId/user/$userId';
+    
+    final response = await _dioClient.get(path);
+    
+    final list = response.data as List<dynamic>;
+    return list.map((json) => AssistantModel.fromJson(json as Map<String, dynamic>)).toList();
   }
 }
