@@ -6,5 +6,6 @@ abstract class DashboardRepository {
   Future<Either<Failure, DashboardMetricsEntity>> getMetrics({
     required String clientId,
     required String userId,
+    String filter = '7 days',
   });
 }

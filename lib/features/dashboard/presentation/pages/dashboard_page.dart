@@ -6,7 +6,7 @@ import '../../../widgets/custom_shimmer.dart';
 import '../../../../core/utils/constants/app_colors.dart';
 import '../providers/dashboard_metrics_provider.dart';
 
-final timeframeProvider = StateProvider<String>((ref) => '7 Days');
+
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
