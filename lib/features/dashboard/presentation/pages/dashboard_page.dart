@@ -56,9 +56,9 @@ class DashboardPage extends ConsumerWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Good afternoon',
-                      style: TextStyle(
+                    Text(
+                      _getGreeting(),
+                      style: const TextStyle(
                         color: Color(0xFF64748B),
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -450,4 +450,16 @@ class DashboardPage extends ConsumerWidget {
     );
   }
 
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour >= 5 && hour < 12) {
+      return 'Good morning';
+    } else if (hour >= 12 && hour < 17) {
+      return 'Good afternoon';
+    } else if (hour >= 17 && hour < 22) {
+      return 'Good evening';
+    } else {
+      return 'Good night';
+    }
+  }
 }
