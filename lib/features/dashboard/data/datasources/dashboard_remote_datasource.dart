@@ -7,6 +7,7 @@ abstract class DashboardRemoteDataSource {
   Future<DashboardMetricsModel> getMetrics({
     required String clientId,
     required String userId,
+    String filter = '7 days',
   });
 }
 
@@ -20,6 +21,7 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
   Future<DashboardMetricsModel> getMetrics({
     required String clientId,
     required String userId,
+    String filter = '7 days',
   }) async {
     final path = '/api/workspace/client/$clientId/user/$userId/metrics';
     
@@ -27,6 +29,7 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
       path,
       queryParameters: {
         'config_type': 'default',
+        'filter': filter,
       },
     );
     

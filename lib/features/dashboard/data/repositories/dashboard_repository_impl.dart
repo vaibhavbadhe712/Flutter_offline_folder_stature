@@ -16,11 +16,13 @@ class DashboardRepositoryImpl implements DashboardRepository {
   Future<Either<Failure, DashboardMetricsEntity>> getMetrics({
     required String clientId,
     required String userId,
+    String filter = '7 days',
   }) async {
     try {
       final model = await _remoteDataSource.getMetrics(
         clientId: clientId,
         userId: userId,
+        filter: filter,
       );
       return Right(model.toEntity());
     } on ServerException catch (e) {

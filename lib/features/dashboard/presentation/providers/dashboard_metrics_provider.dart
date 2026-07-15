@@ -5,20 +5,23 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/usecases/get_dashboard_metrics_usecase.dart';
 import '../state/dashboard_metrics_state.dart';
 
+final timeframeProvider = StateProvider<String>((ref) => '7 Days');
+
 final dashboardMetricsProvider = StateNotifierProvider<DashboardMetricsNotifier, DashboardMetricsState>((ref) {
   final authState = ref.watch(authProvider);
+  final timeframe = ref.watch(timeframeProvider);
   final notifier = DashboardMetricsNotifier(
     getDashboardMetricsUseCase: getIt<GetDashboardMetricsUseCase>(),
     secureStorage: getIt<SecureStorageService>(),
   );
   
-  // Watch auth state to automatically fetch metrics for the active authenticated user
+  // Watch auth state and timeframe to automatically fetch metrics
   authState.maybeWhen(
     authenticated: (user) {
-      notifier.fetchMetrics(userId: user.id);
+      notifier.fetchMetrics(userId: user.id, filter: timeframe);
     },
     orElse: () {
-      notifier.fetchMetrics();
+      notifier.fetchMetrics(filter: timeframe);
     },
   );
   
@@ -34,7 +37,7 @@ class DashboardMetricsNotifier extends StateNotifier<DashboardMetricsState> {
     required this.secureStorage,
   }) : super(const DashboardMetricsState.initial());
 
-  Future<void> fetchMetrics({String? userId}) async {
+  Future<void> fetchMetrics({String? userId, String? filter}) async {
     state = const DashboardMetricsState.loading();
     
     // Read actual client ID from storage, default to curl client ID if null
@@ -46,6 +49,7 @@ class DashboardMetricsNotifier extends StateNotifier<DashboardMetricsState> {
       GetDashboardMetricsParams(
         clientId: clientId,
         userId: finalUserId,
+        filter: filter?.toLowerCase() ?? '7 days',
       ),
     );
 

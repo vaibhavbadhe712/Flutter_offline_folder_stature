@@ -8,10 +8,12 @@ import '../repositories/dashboard_repository.dart';
 class GetDashboardMetricsParams {
   final String clientId;
   final String userId;
+  final String filter;
 
   const GetDashboardMetricsParams({
     required this.clientId,
     required this.userId,
+    this.filter = '7 days',
   });
 }
 
@@ -26,6 +28,7 @@ class GetDashboardMetricsUseCase implements UseCase<DashboardMetricsEntity, GetD
     return _repository.getMetrics(
       clientId: params.clientId,
       userId: params.userId,
+      filter: params.filter,
     );
   }
 }
