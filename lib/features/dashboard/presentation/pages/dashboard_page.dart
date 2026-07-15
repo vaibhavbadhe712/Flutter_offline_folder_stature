@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../widgets/activity_list_item.dart';
+import '../../../widgets/custom_shimmer.dart';
 import '../../../../core/utils/constants/app_colors.dart';
 import '../providers/dashboard_metrics_provider.dart';
 
@@ -172,8 +173,8 @@ class DashboardPage extends ConsumerWidget {
             SizedBox(
               height: 152,
               child: ref.watch(dashboardMetricsProvider).when(
-                initial: () => const Center(child: CircularProgressIndicator()),
-                loading: () => const Center(child: CircularProgressIndicator()),
+                initial: () => _buildStatCardsLoadingShimmer(),
+                loading: () => _buildStatCardsLoadingShimmer(),
                 error: (message) => Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -368,12 +369,13 @@ class DashboardPage extends ConsumerWidget {
   }
 
   Widget _buildStatCard({
-    required IconData icon,
-    required String title,
-    required String value,
+    IconData? icon,
+    String? title,
+    String? value,
     Color iconColor = AppColors.statCardIconDefault,
     Color iconBgColor = AppColors.statCardIconBgDefault,
     String subtext = '',
+    bool isLoading = false,
   }) {
     return Container(
       width: 172,
@@ -391,62 +393,99 @@ class DashboardPage extends ConsumerWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+      child: isLoading
+          ? const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    CustomShimmer.rectangular(
+                      width: 70,
+                      height: 14,
+                      borderRadius: BorderRadius.all(Radius.circular(4)),
+                    ),
+                    CustomShimmer.rectangular(
+                      width: 36,
+                      height: 36,
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                    ),
+                  ],
+                ),
+                Spacer(),
+                CustomShimmer.rectangular(
+                  width: 90,
+                  height: 28,
+                  borderRadius: BorderRadius.all(Radius.circular(4)),
+                ),
+              ],
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title ?? '',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AppColors.statCardTitle,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: iconBgColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: Icon(icon, color: iconColor, size: 20),
+                      ),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                Text(
+                  value ?? '',
                   style: const TextStyle(
-                    color: AppColors.statCardTitle,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
+                    color: AppColors.statCardValue,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: iconBgColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Icon(icon, color: iconColor, size: 20),
-                ),
-              ),
-            ],
-          ),
-          const Spacer(),
-          Text(
-            value,
-            style: const TextStyle(
-              color: AppColors.statCardValue,
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+                if (subtext.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subtext,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AppColors.statCardTitle,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ],
             ),
-          ),
-          if (subtext.isNotEmpty) ...[
-          const SizedBox(height: 2),
-          Text(
-            subtext,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: AppColors.statCardTitle,
-              fontSize: 11,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-          ],
-        ],
-      ),
+    );
+  }
+
+  Widget _buildStatCardsLoadingShimmer() {
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: 4,
+      itemBuilder: (context, index) => _buildStatCard(isLoading: true),
     );
   }
 

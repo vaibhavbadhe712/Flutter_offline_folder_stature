@@ -71,6 +71,7 @@ dependencies:
   # Logging & Security
   logger: ^2.3.0
   crypto: ^3.0.3
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:
