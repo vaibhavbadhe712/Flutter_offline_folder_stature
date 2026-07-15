@@ -132,14 +132,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1032.CallsRepository>(
       () => _i722.CallsRepositoryImpl(gh<_i903.CallsRemoteDataSource>()),
     );
-    gh.lazySingleton<_i398.GetOutboundPhoneNumbersUseCase>(
-      () => _i398.GetOutboundPhoneNumbersUseCase(gh<_i1032.CallsRepository>()),
-    );
     gh.lazySingleton<_i570.GetAssistantsUseCase>(
       () => _i570.GetAssistantsUseCase(gh<_i1032.CallsRepository>()),
     );
     gh.lazySingleton<_i264.GetContactsUseCase>(
       () => _i264.GetContactsUseCase(gh<_i1032.CallsRepository>()),
+    );
+    gh.lazySingleton<_i398.GetOutboundPhoneNumbersUseCase>(
+      () => _i398.GetOutboundPhoneNumbersUseCase(gh<_i1032.CallsRepository>()),
     );
     gh.lazySingleton<_i489.StartTestCallUseCase>(
       () => _i489.StartTestCallUseCase(gh<_i1032.CallsRepository>()),
