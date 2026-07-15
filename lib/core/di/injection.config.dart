@@ -43,6 +43,8 @@ import '../../features/calls/domain/usecases/get_contacts_usecase.dart'
     as _i264;
 import '../../features/calls/domain/usecases/get_outbound_phone_numbers_usecase.dart'
     as _i398;
+import '../../features/calls/domain/usecases/start_test_call_usecase.dart'
+    as _i489;
 import '../../features/dashboard/data/datasources/dashboard_remote_datasource.dart'
     as _i817;
 import '../../features/dashboard/data/repositories/dashboard_repository_impl.dart'
@@ -138,6 +140,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i264.GetContactsUseCase>(
       () => _i264.GetContactsUseCase(gh<_i1032.CallsRepository>()),
+    );
+    gh.lazySingleton<_i489.StartTestCallUseCase>(
+      () => _i489.StartTestCallUseCase(gh<_i1032.CallsRepository>()),
     );
     gh.lazySingleton<_i787.AuthRepository>(
       () => _i153.AuthRepositoryImpl(

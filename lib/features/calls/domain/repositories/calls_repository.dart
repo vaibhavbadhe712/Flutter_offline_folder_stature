@@ -19,4 +19,13 @@ abstract class CallsRepository {
     required String clientId,
     required String userId,
   });
+
+  Future<Either<Failure, String>> startTestCall({
+    required String clientId,
+    required String userId,
+    required int assistantId,
+    required String toNumber,
+    required int phoneNumberId,
+    required int contactId,
+  });
 }
