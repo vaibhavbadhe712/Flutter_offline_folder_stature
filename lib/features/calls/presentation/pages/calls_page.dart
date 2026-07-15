@@ -319,13 +319,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
         ),
         loaded: (phoneNumbers) {
           if (phoneNumbers.isEmpty) {
-            return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.0),
-              child: Text(
-                'No outbound phone numbers configured',
-                style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
-              ),
-            );
+            return _buildEmptyField('No outbound phone numbers configured');
           }
 
           // Safe dynamic fallback to avoid build error
@@ -382,13 +376,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
         ),
         loaded: (assistants) {
           if (assistants.isEmpty) {
-            return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.0),
-              child: Text(
-                'No assistants configured',
-                style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
-              ),
-            );
+            return _buildEmptyField('No assistants configured');
           }
 
           // Safe dynamic fallback to avoid build error
@@ -442,13 +430,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
         ),
         loaded: (contacts) {
           if (contacts.isEmpty) {
-            return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.0),
-              child: Text(
-                'No contacts configured',
-                style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
-              ),
-            );
+            return _buildEmptyField('No contacts configured');
           }
 
           // Safe dynamic fallback to avoid build error
@@ -734,6 +716,34 @@ class _CallsPageState extends ConsumerState<CallsPage> {
         ),
       );
     }).toList();
+  }
+
+  Widget _buildEmptyField(String message) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.info_outline, size: 18, color: Color(0xFF94A3B8)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(
+                color: Color(0xFF64748B),
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildDropdownFieldShimmer() {
