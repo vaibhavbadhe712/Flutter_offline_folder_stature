@@ -82,4 +82,34 @@ class CallsRepositoryImpl implements CallsRepository {
       return Left(UnexpectedFailure('An error occurred during loading contacts: $e'));
     }
   }
+
+  @override
+  Future<Either<Failure, String>> startTestCall({
+    required String clientId,
+    required String userId,
+    required int assistantId,
+    required String toNumber,
+    required int phoneNumberId,
+    required int contactId,
+  }) async {
+    try {
+      final message = await _remoteDataSource.startTestCall(
+        clientId: clientId,
+        userId: userId,
+        assistantId: assistantId,
+        toNumber: toNumber,
+        phoneNumberId: phoneNumberId,
+        contactId: contactId,
+      );
+      return Right(message);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode, errorData: e.errorData));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure('An error occurred during starting test call: $e'));
+    }
+  }
 }
