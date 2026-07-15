@@ -17,6 +17,7 @@ import '../../domain/entities/contact_entity.dart';
 import '../providers/start_call_provider.dart';
 import '../state/start_call_state.dart';
 import '../../../../core/utils/toast_services/toast_services.dart';
+import '../../../widgets/custom_shimmer.dart';
 
 class _CampaignEntry {
   const _CampaignEntry({
@@ -278,18 +279,8 @@ class _CallsPageState extends ConsumerState<CallsPage> {
       _buildFieldLabel(Icons.phone_in_talk_outlined, 'Phone Number'),
       const SizedBox(height: 8),
       state.when(
-        initial: () => const Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 16.0),
-            child: CircularProgressIndicator(),
-          ),
-        ),
-        loading: () => const Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 16.0),
-            child: CircularProgressIndicator(),
-          ),
-        ),
+        initial: () => _buildDropdownFieldShimmer(),
+        loading: () => _buildDropdownFieldShimmer(),
         error: (message) => Container(
           width: double.infinity,
           padding: const EdgeInsets.all(12),
@@ -363,18 +354,8 @@ class _CallsPageState extends ConsumerState<CallsPage> {
       _buildFieldLabel(Icons.radio_button_unchecked_outlined, 'Assistant'),
       const SizedBox(height: 8),
       assistantsState.when(
-        initial: () => const Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 16.0),
-            child: CircularProgressIndicator(),
-          ),
-        ),
-        loading: () => const Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 16.0),
-            child: CircularProgressIndicator(),
-          ),
-        ),
+        initial: () => _buildDropdownFieldShimmer(),
+        loading: () => _buildDropdownFieldShimmer(),
         error: (message) => Container(
           width: double.infinity,
           padding: const EdgeInsets.all(12),
@@ -433,18 +414,8 @@ class _CallsPageState extends ConsumerState<CallsPage> {
       _buildFieldLabel(Icons.people_outline, 'Contact'),
       const SizedBox(height: 8),
       contactsState.when(
-        initial: () => const Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 16.0),
-            child: CircularProgressIndicator(),
-          ),
-        ),
-        loading: () => const Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 16.0),
-            child: CircularProgressIndicator(),
-          ),
-        ),
+        initial: () => _buildDropdownFieldShimmer(),
+        loading: () => _buildDropdownFieldShimmer(),
         error: (message) => Container(
           width: double.infinity,
           padding: const EdgeInsets.all(12),
@@ -763,5 +734,41 @@ class _CallsPageState extends ConsumerState<CallsPage> {
         ),
       );
     }).toList();
+  }
+
+  Widget _buildDropdownFieldShimmer() {
+    return Container(
+      width: double.infinity,
+      height: 60,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        border: Border.all(color: AppColors.fieldBorderColor),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CustomShimmer.rectangular(
+                width: 80,
+                height: 14,
+                borderRadius: BorderRadius.all(Radius.circular(4)),
+              ),
+              SizedBox(height: 4),
+              CustomShimmer.rectangular(
+                width: 120,
+                height: 12,
+                borderRadius: BorderRadius.all(Radius.circular(4)),
+              ),
+            ],
+          ),
+          Icon(Icons.keyboard_arrow_down, color: AppColors.fieldBorderColor),
+        ],
+      ),
+    );
   }
 }
