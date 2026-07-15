@@ -11,6 +11,9 @@ import '../../domain/entities/phone_number_entity.dart';
 import '../providers/assistants_provider.dart';
 import '../state/assistants_state.dart';
 import '../../domain/entities/assistant_entity.dart';
+import '../providers/contacts_provider.dart';
+import '../state/contacts_state.dart';
+import '../../domain/entities/contact_entity.dart';
 
 class _CampaignEntry {
   const _CampaignEntry({
@@ -85,12 +88,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
 
   String? _selectedAssistant;
 
-  final List<Map<String, String>> _contacts = [
-    {'name': 'Aniket gagare', 'number': '+918208149357'},
-    {'name': 'Rohan Deshmukh', 'number': '+919876543210'},
-    {'name': 'Priya Sharma', 'number': '+919123456789'},
-  ];
-  late Map<String, String> _selectedContact = _contacts[0];
+  ContactEntity? _selectedContact;
 
   String _selectedAgent = 'Support Bot V1';
   final _phoneController = TextEditingController();
@@ -111,6 +109,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
   Widget build(BuildContext context) {
     final outboundState = ref.watch(outboundPhoneNumbersProvider);
     final assistantsState = ref.watch(assistantsProvider);
+    final contactsState = ref.watch(contactsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.whiteColor,
@@ -126,7 +125,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.black),
               ),
               const SizedBox(height: 16),
-              CustomCard(child: _buildCallForm(outboundState, assistantsState)),
+              CustomCard(child: _buildCallForm(outboundState, assistantsState, contactsState)),
               const SizedBox(height: 24),
               const Text(
                 'Live Progress Monitor',
@@ -177,7 +176,11 @@ class _CallsPageState extends ConsumerState<CallsPage> {
     );
   }
 
-  Widget _buildCallForm(OutboundPhoneNumbersState outboundState, AssistantsState assistantsState) {
+  Widget _buildCallForm(
+    OutboundPhoneNumbersState outboundState,
+    AssistantsState assistantsState,
+    ContactsState contactsState,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -197,7 +200,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
           const SizedBox(height: 8),
           _buildAgentDropdown(),
         ] else ...[
-          ..._buildSingleFields(outboundState, assistantsState),
+          ..._buildSingleFields(outboundState, assistantsState, contactsState),
         ],
         const SizedBox(height: 24),
         _buildStartButton(),
@@ -205,7 +208,11 @@ class _CallsPageState extends ConsumerState<CallsPage> {
     );
   }
 
-  List<Widget> _buildSingleFields(OutboundPhoneNumbersState state, AssistantsState assistantsState) {
+  List<Widget> _buildSingleFields(
+    OutboundPhoneNumbersState state,
+    AssistantsState assistantsState,
+    ContactsState contactsState,
+  ) {
     return [
       const Text(
         'SINGLE TEST CALL',
@@ -248,22 +255,22 @@ class _CallsPageState extends ConsumerState<CallsPage> {
           width: double.infinity,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFFFEF2F2),
+            color: AppColors.noticeRedBg,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFFCA5A5)),
+            border: Border.all(color: AppColors.noticeRedText.withValues(alpha: 0.3)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Error loading numbers: $message',
-                style: const TextStyle(color: Color(0xFF991B1B), fontSize: 13),
+                style: const TextStyle(color: AppColors.noticeRedText, fontSize: 13),
               ),
               const SizedBox(height: 4),
               TextButton(
                 onPressed: () => ref.read(outboundPhoneNumbersProvider.notifier).fetchOutboundNumbers(),
                 style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
-                child: const Text('Retry', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFDC2626))),
+                child: const Text('Retry', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.noticeRedText)),
               ),
             ],
           ),
@@ -318,22 +325,22 @@ class _CallsPageState extends ConsumerState<CallsPage> {
           width: double.infinity,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFFFEF2F2),
+            color: AppColors.noticeRedBg,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFFCA5A5)),
+            border: Border.all(color: AppColors.noticeRedText.withValues(alpha: 0.3)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Error loading assistants: $message',
-                style: const TextStyle(color: Color(0xFF991B1B), fontSize: 13),
+                style: const TextStyle(color: AppColors.noticeRedText, fontSize: 13),
               ),
               const SizedBox(height: 4),
               TextButton(
                 onPressed: () => ref.read(assistantsProvider.notifier).fetchAssistants(),
                 style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
-                child: const Text('Retry', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFDC2626))),
+                child: const Text('Retry', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.noticeRedText)),
               ),
             ],
           ),
@@ -371,11 +378,69 @@ class _CallsPageState extends ConsumerState<CallsPage> {
       // 3. Contact Field
       _buildFieldLabel(Icons.people_outline, 'Contact'),
       const SizedBox(height: 8),
-      _buildDropdownField<Map<String, String>>(
-        value: _selectedContact,
-        items: _buildContactItems(),
-        onChanged: (val) {
-          if (val != null) setState(() => _selectedContact = val);
+      contactsState.when(
+        initial: () => const Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 16.0),
+            child: CircularProgressIndicator(),
+          ),
+        ),
+        loading: () => const Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 16.0),
+            child: CircularProgressIndicator(),
+          ),
+        ),
+        error: (message) => Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.noticeRedBg,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.noticeRedText.withValues(alpha: 0.3)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Error loading contacts: $message',
+                style: const TextStyle(color: AppColors.noticeRedText, fontSize: 13),
+              ),
+              const SizedBox(height: 4),
+              TextButton(
+                onPressed: () => ref.read(contactsProvider.notifier).fetchContacts(),
+                style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
+                child: const Text('Retry', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.noticeRedText)),
+              ),
+            ],
+          ),
+        ),
+        loaded: (contacts) {
+          if (contacts.isEmpty) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16.0),
+              child: Text(
+                'No contacts configured',
+                style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+              ),
+            );
+          }
+
+          // Safe dynamic fallback to avoid build error
+          if (_selectedContact == null || !contacts.any((item) => item.id == _selectedContact!.id)) {
+            _selectedContact = contacts.first;
+          } else {
+            // Re-match reference
+            _selectedContact = contacts.firstWhere((item) => item.id == _selectedContact!.id);
+          }
+
+          return _buildDropdownField<ContactEntity>(
+            value: _selectedContact!,
+            items: _buildContactItems(contacts),
+            onChanged: (val) {
+              if (val != null) setState(() => _selectedContact = val);
+            },
+          );
         },
       ),
     ];
@@ -466,8 +531,12 @@ class _CallsPageState extends ConsumerState<CallsPage> {
               _showSnack('Please select an assistant.');
               return;
             }
+            if (_selectedContact == null) {
+              _showSnack('Please select a contact.');
+              return;
+            }
             _showSnack(
-              'Starting AI Test Call to ${_selectedContact['name']} (${_selectedContact['number']}) '
+              'Starting AI Test Call to ${_selectedContact!.firstName} (${_selectedContact!.phoneNumber}) '
               'using Assistant $_selectedAssistant via ${_selectedOutbound!.name} (${_selectedOutbound!.phoneNumber})...',
             );
           }
@@ -552,8 +621,8 @@ class _CallsPageState extends ConsumerState<CallsPage> {
     }).toList();
   }
 
-  List<DropdownMenuItem<Map<String, String>>> _buildContactItems() {
-    return _contacts.map((item) {
+  List<DropdownMenuItem<ContactEntity>> _buildContactItems(List<ContactEntity> contacts) {
+    return contacts.map((item) {
       return DropdownMenuItem(
         value: item,
         child: Column(
@@ -561,7 +630,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              item['name']!,
+              item.firstName,
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -570,7 +639,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
             ),
             const SizedBox(height: 2),
             Text(
-              item['number']!,
+              item.phoneNumber,
               style: const TextStyle(
                 fontSize: 12,
                 color: Color(0xFF64748B),
