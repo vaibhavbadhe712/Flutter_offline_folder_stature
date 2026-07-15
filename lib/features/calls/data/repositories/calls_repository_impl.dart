@@ -4,6 +4,7 @@ import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/phone_number_entity.dart';
 import '../../domain/entities/assistant_entity.dart';
+import '../../domain/entities/contact_entity.dart';
 import '../../domain/repositories/calls_repository.dart';
 import '../datasources/calls_remote_datasource.dart';
 
@@ -56,6 +57,29 @@ class CallsRepositoryImpl implements CallsRepository {
       return Left(AuthFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure('An error occurred during loading assistants: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<ContactEntity>>> getContacts({
+    required String clientId,
+    required String userId,
+  }) async {
+    try {
+      final models = await _remoteDataSource.getContacts(
+        clientId: clientId,
+        userId: userId,
+      );
+      final entities = models.map((model) => model.toEntity()).toList();
+      return Right(entities);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode, errorData: e.errorData));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure('An error occurred during loading contacts: $e'));
     }
   }
 }
