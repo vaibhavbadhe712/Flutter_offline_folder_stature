@@ -54,3 +54,52 @@ class CustomShimmer extends StatelessWidget {
     );
   }
 }
+
+/// Shimmer skeleton loader that matches the visual layout of ActivityListItem
+class ActivityListItemShimmer extends StatelessWidget {
+  const ActivityListItemShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFF1F5F9)),
+      ),
+      child: Row(
+        children: [
+          // Circular Avatar Shimmer
+          const CustomShimmer.circular(size: 40),
+          const SizedBox(width: 12),
+          // Name and Subtitle Shimmer
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomShimmer.rectangular(width: 120, height: 14),
+                SizedBox(height: 6),
+                CustomShimmer.rectangular(width: 160, height: 11),
+              ],
+            ),
+          ),
+          // Amount and Status Shimmer
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              const CustomShimmer.rectangular(width: 50, height: 14),
+              const SizedBox(height: 8),
+              CustomShimmer.rectangular(
+                width: 60,
+                height: 16,
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}

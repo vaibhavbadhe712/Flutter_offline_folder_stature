@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/dashboard_metrics_entity.dart';
+import '../../domain/entities/recent_activity_entity.dart';
 import '../../domain/repositories/dashboard_repository.dart';
 import '../datasources/dashboard_remote_datasource.dart';
 
@@ -33,6 +34,29 @@ class DashboardRepositoryImpl implements DashboardRepository {
       return Left(AuthFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure('An error occurred during loading metrics: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<RecentActivityEntity>>> getRecentActivity({
+    required String clientId,
+    required String userId,
+  }) async {
+    try {
+      final models = await _remoteDataSource.getRecentActivity(
+        clientId: clientId,
+        userId: userId,
+      );
+      final entities = models.map((m) => m.toEntity()).toList();
+      return Right(entities);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode, errorData: e.errorData));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure('An error occurred during loading activities: $e'));
     }
   }
 }

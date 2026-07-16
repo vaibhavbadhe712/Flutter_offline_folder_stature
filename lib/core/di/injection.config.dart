@@ -53,6 +53,8 @@ import '../../features/dashboard/domain/repositories/dashboard_repository.dart'
     as _i665;
 import '../../features/dashboard/domain/usecases/get_dashboard_metrics_usecase.dart'
     as _i512;
+import '../../features/dashboard/domain/usecases/get_recent_activity_usecase.dart'
+    as _i461;
 import '../config/app_config.dart' as _i650;
 import '../database/sync_engine.dart' as _i809;
 import '../network/auth_event_bus.dart' as _i702;
@@ -128,6 +130,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i512.GetDashboardMetricsUseCase>(
       () => _i512.GetDashboardMetricsUseCase(gh<_i665.DashboardRepository>()),
+    );
+    gh.lazySingleton<_i461.GetRecentActivityUseCase>(
+      () => _i461.GetRecentActivityUseCase(gh<_i665.DashboardRepository>()),
     );
     gh.lazySingleton<_i1032.CallsRepository>(
       () => _i722.CallsRepositoryImpl(gh<_i903.CallsRemoteDataSource>()),
