@@ -5,6 +5,7 @@ import '../../../widgets/activity_list_item.dart';
 import '../../../widgets/custom_shimmer.dart';
 import '../../../../core/utils/constants/app_colors.dart';
 import '../providers/dashboard_metrics_provider.dart';
+import '../providers/recent_activity_provider.dart';
 
 
 
@@ -44,297 +45,319 @@ class DashboardPage extends ConsumerWidget {
           const SizedBox(width: 8),
         ],
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // User Greeting & Wallet Row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _getGreeting(),
-                      style: const TextStyle(
-                        color: Color(0xFF64748B),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      userName,
-                      style: const TextStyle(
-                        color: Color(0xFF0F172A),
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                // Wallet chip
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(30),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.02),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.account_balance_wallet_outlined, color: Color(0xFF4F46E5), size: 20),
-                      const SizedBox(width: 6),
-                      const Text(
-                        '₹4,230.5',
-                        style: TextStyle(
-                          color: Color(0xFF1E293B),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF4F46E5),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.add, color: Colors.white, size: 12),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Timeframe Segmented Selector
-            Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF1F5F9),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
+      body: RefreshIndicator(
+        onRefresh: () async {
+          final authState = ref.read(authProvider);
+          final userId = authState.maybeWhen(
+            authenticated: (user) => user.id,
+            orElse: () => null,
+          );
+          await Future.wait([
+            ref.read(dashboardMetricsProvider.notifier).fetchMetrics(userId: userId),
+            ref.read(recentActivityProvider.notifier).fetchRecentActivity(userId: userId),
+          ]);
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // User Greeting & Wallet Row
+              Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: timeframes.map((timeframe) {
-                  final isSelected = selectedTimeframe == timeframe;
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        ref.read(timeframeProvider.notifier).state = timeframe;
-                      },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isSelected ? Colors.white : Colors.transparent,
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.05),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ]
-                              : [],
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _getGreeting(),
+                        style: const TextStyle(
+                          color: Color(0xFF64748B),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
                         ),
-                        child: Center(
-                          child: Text(
-                            timeframe,
-                            style: TextStyle(
-                              color: isSelected ? const Color(0xFF4F46E5) : const Color(0xFF64748B),
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                              fontSize: 13,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        userName,
+                        style: const TextStyle(
+                          color: Color(0xFF0F172A),
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Wallet chip
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.02),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.account_balance_wallet_outlined, color: Color(0xFF4F46E5), size: 20),
+                        const SizedBox(width: 6),
+                        const Text(
+                          '₹4,230.5',
+                          style: TextStyle(
+                            color: Color(0xFF1E293B),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF4F46E5),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.add, color: Colors.white, size: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Timeframe Segmented Selector
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: timeframes.map((timeframe) {
+                    final isSelected = selectedTimeframe == timeframe;
+                    return Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          ref.read(timeframeProvider.notifier).state = timeframe;
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isSelected ? Colors.white : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: isSelected
+                                ? [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.05),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                : [],
+                          ),
+                          child: Center(
+                            child: Text(
+                              timeframe,
+                              style: TextStyle(
+                                color: isSelected ? const Color(0xFF4F46E5) : const Color(0xFF64748B),
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                }).toList(),
+                    );
+                  }).toList(),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            // Stat Cards Horizontal List
-            SizedBox(
-              height: 152,
-              child: ref.watch(dashboardMetricsProvider).when(
-                initial: () => _buildStatCardsLoadingShimmer(),
-                loading: () => _buildStatCardsLoadingShimmer(),
+              // Stat Cards Horizontal List
+              SizedBox(
+                height: 152,
+                child: ref.watch(dashboardMetricsProvider).when(
+                  initial: () => _buildStatCardsLoadingShimmer(),
+                  loading: () => _buildStatCardsLoadingShimmer(),
+                  error: (message) => Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Error: $message',
+                          style: const TextStyle(color: AppColors.errorRed, fontSize: 12),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 4),
+                        TextButton(
+                          onPressed: () => ref.read(dashboardMetricsProvider.notifier).fetchMetrics(),
+                          child: const Text('Retry', style: TextStyle(fontSize: 12)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  loaded: (metrics) {
+                    final formattedSpend = _formatSpend(metrics.totalSpendLocal, metrics.currency);
+
+                    return ListView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      children: [
+                        _buildStatCard(
+                          icon: Icons.phone_outlined,
+                          iconColor: AppColors.statCardCallsIcon,
+                          iconBgColor: AppColors.statCardCallsBg,
+                          title: 'Total Calls',
+                          value: '${metrics.totalCalls}',
+                        ),
+                        _buildStatCard(
+                          icon: Icons.smart_toy_outlined,
+                          iconColor: AppColors.statCardAgentsIcon,
+                          iconBgColor: AppColors.statCardAgentsBg,
+                          title: 'Active Agents',
+                          value: '${metrics.activeAssistants}',
+                        ),
+                        _buildStatCard(
+                          icon: Icons.access_time_outlined,
+                          iconColor: AppColors.statCardMinutesIcon,
+                          iconBgColor: AppColors.statCardMinutesBg,
+                          title: 'Total Minutes',
+                          value: '${metrics.totalMinutes.toInt()}',
+                        ),
+                        _buildStatCard(
+                          icon: _getCurrencyIcon(metrics.currency),
+                          iconColor: AppColors.statCardSpendIcon,
+                          iconBgColor: AppColors.statCardSpendBg,
+                          title: 'Total Spend',
+                          value: formattedSpend,
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Recent Activity Section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Recent Activity',
+                    style: TextStyle(
+                      color: Color(0xFF0F172A),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text(
+                      'View all',
+                      style: TextStyle(
+                        color: Color(0xFF4F46E5),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+
+              // List of Activities
+              ref.watch(recentActivityProvider).when(
+                initial: () => Column(
+                  children: List.generate(3, (index) => const ActivityListItemShimmer()),
+                ),
+                loading: () => Column(
+                  children: List.generate(3, (index) => const ActivityListItemShimmer()),
+                ),
                 error: (message) => Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Error: $message',
-                        style: const TextStyle(color: AppColors.errorRed, fontSize: 12),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 4),
-                      TextButton(
-                        onPressed: () => ref.read(dashboardMetricsProvider.notifier).fetchMetrics(),
-                        child: const Text('Retry', style: TextStyle(fontSize: 12)),
-                      ),
-                    ],
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Error: $message',
+                          style: const TextStyle(color: Color(0xFFDC2626), fontSize: 12),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: () => ref.read(recentActivityProvider.notifier).fetchRecentActivity(),
+                          child: const Text('Retry', style: TextStyle(fontSize: 12, color: Color(0xFF4F46E5))),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                loaded: (metrics) {
-                  final formattedSpend = _formatSpend(metrics.totalSpendLocal, metrics.currency);
-
-                  return ListView(
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    children: [
-                      _buildStatCard(
-                        icon: Icons.phone_outlined,
-                        iconColor: AppColors.statCardCallsIcon,
-                        iconBgColor: AppColors.statCardCallsBg,
-                        title: 'Total Calls',
-                        value: '${metrics.totalCalls}',
+                loaded: (activities) {
+                  if (activities.isEmpty) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 32.0),
+                        child: Text(
+                          'No recent activity found',
+                          style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                        ),
                       ),
-                      _buildStatCard(
-                        icon: Icons.smart_toy_outlined,
-                        iconColor: AppColors.statCardAgentsIcon,
-                        iconBgColor: AppColors.statCardAgentsBg,
-                        title: 'Active Agents',
-                        value: '${metrics.activeAssistants}',
-                      ),
-                      _buildStatCard(
-                        icon: Icons.access_time_outlined,
-                        iconColor: AppColors.statCardMinutesIcon,
-                        iconBgColor: AppColors.statCardMinutesBg,
-                        title: 'Total Minutes',
-                        value: '${metrics.totalMinutes.toInt()}',
-                      ),
-                      _buildStatCard(
-                        icon: _getCurrencyIcon(metrics.currency),
-                        iconColor: AppColors.statCardSpendIcon,
-                        iconBgColor: AppColors.statCardSpendBg,
-                        title: 'Total Spend',
-                        value: formattedSpend,
-                      ),
-                    ],
+                    );
+                  }
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: activities.length,
+                    itemBuilder: (context, index) {
+                      final activity = activities[index];
+                      final initials = _getInitials(activity.contactInfo);
+                      final avatarColor = _getAvatarColorsForName(activity.contactInfo);
+                      final dateTimeFormatted = _formatActivityDateTime(activity.dateTime);
+                      final typeString = activity.assistantName.toUpperCase();
+                      final subtitle = '$dateTimeFormatted · $typeString';
+                      final amount = _formatSpend(activity.costLocal, activity.currency);
+                      
+                      final status = activity.status;
+                      final Color statusTextColor;
+                      final Color statusBgColor;
+                      
+                      if (status.toLowerCase() == 'completed' || status.toLowerCase() == 'success' || status.toLowerCase() == 'positive') {
+                        statusTextColor = AppColors.statusPositiveText;
+                        statusBgColor = AppColors.mintGreen;
+                      } else if (status.toLowerCase() == 'failed' || status.toLowerCase() == 'cancelled' || status.toLowerCase() == 'negative') {
+                        statusTextColor = AppColors.statusNegativeText;
+                        statusBgColor = AppColors.noticeRedBg;
+                      } else {
+                        statusTextColor = AppColors.statCardAgentsIcon;
+                        statusBgColor = AppColors.statCardAgentsBg;
+                      }
+                      
+                      return ActivityListItem(
+                        initials: initials,
+                        avatarBgColor: avatarColor.bg,
+                        avatarTextColor: avatarColor.text,
+                        name: activity.contactInfo,
+                        subtitle: subtitle,
+                        amount: amount,
+                        status: status,
+                        statusTextColor: statusTextColor,
+                        statusBgColor: statusBgColor,
+                      );
+                    },
                   );
                 },
               ),
-            ),
-            const SizedBox(height: 24),
-
-            // Recent Activity Section
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Recent Activity',
-                  style: TextStyle(
-                    color: Color(0xFF0F172A),
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {},
-                  child: const Text(
-                    'View all',
-                    style: TextStyle(
-                      color: Color(0xFF4F46E5),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-
-            // List of Activities
-            ListView(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                ActivityListItem(
-                  initials: 'RD',
-                  avatarBgColor: const Color(0xFFE0E7FF),
-                  avatarTextColor: const Color(0xFF4F46E5),
-                  name: 'Rohan Deshmukh',
-                  subtitle: '10:42 AM · AI Call',
-                  amount: '₹4.20',
-                  status: 'Positive',
-                  statusTextColor: const Color(0xFF059669),
-                  statusBgColor: const Color(0xFFD1FAE5),
-                ),
-                ActivityListItem(
-                  initials: 'AK',
-                  avatarBgColor: const Color(0xFFF3E8FF),
-                  avatarTextColor: const Color(0xFF9333EA),
-                  name: 'Ayesha Khan',
-                  subtitle: '10:15 AM · Manual',
-                  amount: '₹12.80',
-                  status: 'Neutral',
-                  statusTextColor: const Color(0xFFD97706),
-                  statusBgColor: const Color(0xFFFEF3C7),
-                ),
-                ActivityListItem(
-                  initials: 'VN',
-                  avatarBgColor: const Color(0xFFFEE2E2),
-                  avatarTextColor: const Color(0xFFDC2626),
-                  name: 'Vikram Nair',
-                  subtitle: '09:58 AM · AI Call',
-                  amount: '₹2.10',
-                  status: 'Negative',
-                  statusTextColor: const Color(0xFFB91C1C),
-                  statusBgColor: const Color(0xFFFEE2E2),
-                ),
-                ActivityListItem(
-                  initials: 'PS',
-                  avatarBgColor: const Color(0xFFE0F2FE),
-                  avatarTextColor: const Color(0xFF0284C7),
-                  name: 'Priya Sharma',
-                  subtitle: '09:30 AM · AI Call',
-                  amount: '₹6.75',
-                  status: 'Positive',
-                  statusTextColor: const Color(0xFF059669),
-                  statusBgColor: const Color(0xFFD1FAE5),
-                ),
-                ActivityListItem(
-                  initials: 'KM',
-                  avatarBgColor: const Color(0xFFE0F8E8),
-                  avatarTextColor: const Color(0xFF16A34A),
-                  name: 'Karan Mehta',
-                  subtitle: '09:02 AM · Manual',
-                  amount: '₹18.40',
-                  status: 'Neutral',
-                  statusTextColor: const Color(0xFFD97706),
-                  statusBgColor: const Color(0xFFFEF3C7),
-                ),
-                ActivityListItem(
-                  initials: 'SP',
-                  avatarBgColor: const Color(0xFFEDE9FE),
-                  avatarTextColor: const Color(0xFF6D28D9),
-                  name: 'Sneha Patil',
-                  subtitle: '08:47 AM · AI Call',
-                  amount: '₹3.60',
-                  status: 'Positive',
-                  statusTextColor: const Color(0xFF059669),
-                  statusBgColor: const Color(0xFFD1FAE5),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-          ],
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
@@ -501,4 +524,54 @@ class DashboardPage extends ConsumerWidget {
       return 'Good night';
     }
   }
+
+  String _getInitials(String contactInfo) {
+    final cleanName = contactInfo.replaceAll(RegExp(r'\s*\+?\d+\s*'), '').replaceAll(RegExp(r'[^\w\s]'), '').trim();
+    if (cleanName.isEmpty) return '??';
+    final parts = cleanName.split(RegExp(r'\s+'));
+    if (parts.length > 1) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return parts[0].substring(0, parts[0].length >= 2 ? 2 : 1).toUpperCase();
+  }
+
+  _AvatarColor _getAvatarColorsForName(String name) {
+    if (name.isEmpty) return _avatarColors[0];
+    final index = name.hashCode.abs() % _avatarColors.length;
+    return _avatarColors[index];
+  }
+
+  String _formatActivityDateTime(String dateTimeStr) {
+    try {
+      final dt = DateTime.parse(dateTimeStr).toLocal();
+      final now = DateTime.now();
+      final hour = dt.hour == 0 ? 12 : (dt.hour > 12 ? dt.hour - 12 : dt.hour);
+      final period = dt.hour >= 12 ? 'PM' : 'AM';
+      final minute = dt.minute.toString().padLeft(2, '0');
+      final timeStr = '${hour.toString().padLeft(2, '0')}:$minute $period';
+      
+      final isToday = dt.year == now.year && dt.month == now.month && dt.day == now.day;
+      if (isToday) {
+        return timeStr;
+      } else {
+        final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return '${months[dt.month - 1]} ${dt.day}, $timeStr';
+      }
+    } catch (_) {
+      return '';
+    }
+  }
 }
+
+class _AvatarColor {
+  final Color bg;
+  final Color text;
+  const _AvatarColor(this.bg, this.text);
+}
+
+const List<_AvatarColor> _avatarColors = [
+  _AvatarColor(AppColors.avatarIndigoBg, AppColors.avatarIndigoText),
+  _AvatarColor(AppColors.avatarSkyBg, AppColors.avatarSkyText),
+  _AvatarColor(AppColors.avatarVioletBg, AppColors.avatarVioletText),
+  _AvatarColor(AppColors.noticeRedBg, AppColors.noticeRedText),
+];
