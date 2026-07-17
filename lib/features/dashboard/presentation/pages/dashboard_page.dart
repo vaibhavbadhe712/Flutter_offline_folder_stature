@@ -16,7 +16,7 @@ class DashboardPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
     final selectedTimeframe = ref.watch(timeframeProvider);
-    final timeframes = ['Today', '7 Days', '30 Days', 'Custom'];
+    final timeframes = ['Today', '7 Days', '30 Days'];
 
     final userName = authState.maybeWhen(
       authenticated: (user) => user.name,
