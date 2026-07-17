@@ -302,12 +302,29 @@ class DashboardPage extends ConsumerWidget {
                 ),
                 loaded: (activities) {
                   if (activities.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 32.0),
-                        child: Text(
-                          'No recent activity found',
-                          style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                        padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 24.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              'assets/images/no_data.png',
+                              width: 180,
+                              height: 150,
+                              fit: BoxFit.contain,
+                            ),
+                            const SizedBox(height: 16),
+                            const Text(
+                              'No Recent Activity Found',
+                              style: TextStyle(
+                                color: AppColors.black,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                          ],
                         ),
                       ),
                     );
