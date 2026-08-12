@@ -9,7 +9,7 @@ part 'assistant_model.g.dart';
 @freezed
 class AssistantModel with _$AssistantModel {
   const factory AssistantModel({
-    required int id,
+    required String id,
     @JsonKey(name: 'public_id') required String publicId,
     required String name,
     required String status,
@@ -17,7 +17,7 @@ class AssistantModel with _$AssistantModel {
     @JsonKey(name: 'llm_provider') required String llmProvider,
     @JsonKey(name: 'voice_provider') required String voiceProvider,
     @JsonKey(name: 'inbound_enabled') required bool inboundEnabled,
-    @JsonKey(name: 'inbound_phone_number_id') int? inboundPhoneNumberId,
+    @JsonKey(name: 'inbound_phone_number_id') String? inboundPhoneNumberId,
     @JsonKey(name: 'created_at') required String createdAt,
   }) = _AssistantModel;
 

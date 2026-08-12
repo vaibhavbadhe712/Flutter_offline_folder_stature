@@ -17,7 +17,7 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$PhoneNumberEntity {
-  int get id => throw _privateConstructorUsedError;
+  String get id => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   String get phoneNumber => throw _privateConstructorUsedError;
   String get provider => throw _privateConstructorUsedError;
@@ -39,7 +39,7 @@ abstract class $PhoneNumberEntityCopyWith<$Res> {
   ) = _$PhoneNumberEntityCopyWithImpl<$Res, PhoneNumberEntity>;
   @useResult
   $Res call({
-    int id,
+    String id,
     String name,
     String phoneNumber,
     String provider,
@@ -75,7 +75,7 @@ class _$PhoneNumberEntityCopyWithImpl<$Res, $Val extends PhoneNumberEntity>
             id: null == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
-                      as int,
+                      as String,
             name: null == name
                 ? _value.name
                 : name // ignore: cast_nullable_to_non_nullable
@@ -112,7 +112,7 @@ abstract class _$$PhoneNumberEntityImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    int id,
+    String id,
     String name,
     String phoneNumber,
     String provider,
@@ -147,7 +147,7 @@ class __$$PhoneNumberEntityImplCopyWithImpl<$Res>
         id: null == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
-                  as int,
+                  as String,
         name: null == name
             ? _value.name
             : name // ignore: cast_nullable_to_non_nullable
@@ -186,7 +186,7 @@ class _$PhoneNumberEntityImpl implements _PhoneNumberEntity {
   });
 
   @override
-  final int id;
+  final String id;
   @override
   final String name;
   @override
@@ -245,7 +245,7 @@ class _$PhoneNumberEntityImpl implements _PhoneNumberEntity {
 
 abstract class _PhoneNumberEntity implements PhoneNumberEntity {
   const factory _PhoneNumberEntity({
-    required final int id,
+    required final String id,
     required final String name,
     required final String phoneNumber,
     required final String provider,
@@ -254,7 +254,7 @@ abstract class _PhoneNumberEntity implements PhoneNumberEntity {
   }) = _$PhoneNumberEntityImpl;
 
   @override
-  int get id;
+  String get id;
   @override
   String get name;
   @override

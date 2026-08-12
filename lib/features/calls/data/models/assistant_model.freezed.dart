@@ -21,7 +21,7 @@ AssistantModel _$AssistantModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$AssistantModel {
-  int get id => throw _privateConstructorUsedError;
+  String get id => throw _privateConstructorUsedError;
   @JsonKey(name: 'public_id')
   String get publicId => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
@@ -35,7 +35,7 @@ mixin _$AssistantModel {
   @JsonKey(name: 'inbound_enabled')
   bool get inboundEnabled => throw _privateConstructorUsedError;
   @JsonKey(name: 'inbound_phone_number_id')
-  int? get inboundPhoneNumberId => throw _privateConstructorUsedError;
+  String? get inboundPhoneNumberId => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
   String get createdAt => throw _privateConstructorUsedError;
 
@@ -57,7 +57,7 @@ abstract class $AssistantModelCopyWith<$Res> {
   ) = _$AssistantModelCopyWithImpl<$Res, AssistantModel>;
   @useResult
   $Res call({
-    int id,
+    String id,
     @JsonKey(name: 'public_id') String publicId,
     String name,
     String status,
@@ -65,7 +65,7 @@ abstract class $AssistantModelCopyWith<$Res> {
     @JsonKey(name: 'llm_provider') String llmProvider,
     @JsonKey(name: 'voice_provider') String voiceProvider,
     @JsonKey(name: 'inbound_enabled') bool inboundEnabled,
-    @JsonKey(name: 'inbound_phone_number_id') int? inboundPhoneNumberId,
+    @JsonKey(name: 'inbound_phone_number_id') String? inboundPhoneNumberId,
     @JsonKey(name: 'created_at') String createdAt,
   });
 }
@@ -101,7 +101,7 @@ class _$AssistantModelCopyWithImpl<$Res, $Val extends AssistantModel>
             id: null == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
-                      as int,
+                      as String,
             publicId: null == publicId
                 ? _value.publicId
                 : publicId // ignore: cast_nullable_to_non_nullable
@@ -133,7 +133,7 @@ class _$AssistantModelCopyWithImpl<$Res, $Val extends AssistantModel>
             inboundPhoneNumberId: freezed == inboundPhoneNumberId
                 ? _value.inboundPhoneNumberId
                 : inboundPhoneNumberId // ignore: cast_nullable_to_non_nullable
-                      as int?,
+                      as String?,
             createdAt: null == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -154,7 +154,7 @@ abstract class _$$AssistantModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    int id,
+    String id,
     @JsonKey(name: 'public_id') String publicId,
     String name,
     String status,
@@ -162,7 +162,7 @@ abstract class _$$AssistantModelImplCopyWith<$Res>
     @JsonKey(name: 'llm_provider') String llmProvider,
     @JsonKey(name: 'voice_provider') String voiceProvider,
     @JsonKey(name: 'inbound_enabled') bool inboundEnabled,
-    @JsonKey(name: 'inbound_phone_number_id') int? inboundPhoneNumberId,
+    @JsonKey(name: 'inbound_phone_number_id') String? inboundPhoneNumberId,
     @JsonKey(name: 'created_at') String createdAt,
   });
 }
@@ -197,7 +197,7 @@ class __$$AssistantModelImplCopyWithImpl<$Res>
         id: null == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
-                  as int,
+                  as String,
         publicId: null == publicId
             ? _value.publicId
             : publicId // ignore: cast_nullable_to_non_nullable
@@ -229,7 +229,7 @@ class __$$AssistantModelImplCopyWithImpl<$Res>
         inboundPhoneNumberId: freezed == inboundPhoneNumberId
             ? _value.inboundPhoneNumberId
             : inboundPhoneNumberId // ignore: cast_nullable_to_non_nullable
-                  as int?,
+                  as String?,
         createdAt: null == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -259,7 +259,7 @@ class _$AssistantModelImpl extends _AssistantModel {
       _$$AssistantModelImplFromJson(json);
 
   @override
-  final int id;
+  final String id;
   @override
   @JsonKey(name: 'public_id')
   final String publicId;
@@ -281,7 +281,7 @@ class _$AssistantModelImpl extends _AssistantModel {
   final bool inboundEnabled;
   @override
   @JsonKey(name: 'inbound_phone_number_id')
-  final int? inboundPhoneNumberId;
+  final String? inboundPhoneNumberId;
   @override
   @JsonKey(name: 'created_at')
   final String createdAt;
@@ -350,7 +350,7 @@ class _$AssistantModelImpl extends _AssistantModel {
 
 abstract class _AssistantModel extends AssistantModel {
   const factory _AssistantModel({
-    required final int id,
+    required final String id,
     @JsonKey(name: 'public_id') required final String publicId,
     required final String name,
     required final String status,
@@ -358,7 +358,8 @@ abstract class _AssistantModel extends AssistantModel {
     @JsonKey(name: 'llm_provider') required final String llmProvider,
     @JsonKey(name: 'voice_provider') required final String voiceProvider,
     @JsonKey(name: 'inbound_enabled') required final bool inboundEnabled,
-    @JsonKey(name: 'inbound_phone_number_id') final int? inboundPhoneNumberId,
+    @JsonKey(name: 'inbound_phone_number_id')
+    final String? inboundPhoneNumberId,
     @JsonKey(name: 'created_at') required final String createdAt,
   }) = _$AssistantModelImpl;
   const _AssistantModel._() : super._();
@@ -367,7 +368,7 @@ abstract class _AssistantModel extends AssistantModel {
       _$AssistantModelImpl.fromJson;
 
   @override
-  int get id;
+  String get id;
   @override
   @JsonKey(name: 'public_id')
   String get publicId;
@@ -389,7 +390,7 @@ abstract class _AssistantModel extends AssistantModel {
   bool get inboundEnabled;
   @override
   @JsonKey(name: 'inbound_phone_number_id')
-  int? get inboundPhoneNumberId;
+  String? get inboundPhoneNumberId;
   @override
   @JsonKey(name: 'created_at')
   String get createdAt;

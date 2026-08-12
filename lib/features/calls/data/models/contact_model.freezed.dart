@@ -21,7 +21,7 @@ ContactModel _$ContactModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$ContactModel {
-  int get id => throw _privateConstructorUsedError;
+  String get id => throw _privateConstructorUsedError;
   @JsonKey(name: 'first_name')
   String get firstName => throw _privateConstructorUsedError;
   @JsonKey(name: 'last_name')
@@ -51,7 +51,7 @@ abstract class $ContactModelCopyWith<$Res> {
   ) = _$ContactModelCopyWithImpl<$Res, ContactModel>;
   @useResult
   $Res call({
-    int id,
+    String id,
     @JsonKey(name: 'first_name') String firstName,
     @JsonKey(name: 'last_name') String lastName,
     @JsonKey(name: 'phone_number') String phoneNumber,
@@ -89,7 +89,7 @@ class _$ContactModelCopyWithImpl<$Res, $Val extends ContactModel>
             id: null == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
-                      as int,
+                      as String,
             firstName: null == firstName
                 ? _value.firstName
                 : firstName // ignore: cast_nullable_to_non_nullable
@@ -130,7 +130,7 @@ abstract class _$$ContactModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    int id,
+    String id,
     @JsonKey(name: 'first_name') String firstName,
     @JsonKey(name: 'last_name') String lastName,
     @JsonKey(name: 'phone_number') String phoneNumber,
@@ -167,7 +167,7 @@ class __$$ContactModelImplCopyWithImpl<$Res>
         id: null == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
-                  as int,
+                  as String,
         firstName: null == firstName
             ? _value.firstName
             : firstName // ignore: cast_nullable_to_non_nullable
@@ -214,7 +214,7 @@ class _$ContactModelImpl extends _ContactModel {
       _$$ContactModelImplFromJson(json);
 
   @override
-  final int id;
+  final String id;
   @override
   @JsonKey(name: 'first_name')
   final String firstName;
@@ -284,7 +284,7 @@ class _$ContactModelImpl extends _ContactModel {
 
 abstract class _ContactModel extends ContactModel {
   const factory _ContactModel({
-    required final int id,
+    required final String id,
     @JsonKey(name: 'first_name') required final String firstName,
     @JsonKey(name: 'last_name') required final String lastName,
     @JsonKey(name: 'phone_number') required final String phoneNumber,
@@ -298,7 +298,7 @@ abstract class _ContactModel extends ContactModel {
       _$ContactModelImpl.fromJson;
 
   @override
-  int get id;
+  String get id;
   @override
   @JsonKey(name: 'first_name')
   String get firstName;

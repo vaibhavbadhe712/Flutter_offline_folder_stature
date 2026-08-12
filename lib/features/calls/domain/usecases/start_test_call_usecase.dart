@@ -7,10 +7,10 @@ import '../repositories/calls_repository.dart';
 class StartTestCallParams {
   final String clientId;
   final String userId;
-  final int assistantId;
+  final String assistantId;
   final String toNumber;
-  final int phoneNumberId;
-  final int contactId;
+  final String phoneNumberId;
+  final String contactId;
 
   const StartTestCallParams({
     required this.clientId,

@@ -21,7 +21,7 @@ PhoneNumberModel _$PhoneNumberModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$PhoneNumberModel {
-  int get id => throw _privateConstructorUsedError;
+  String get id => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   @JsonKey(name: 'phone_number')
   String get phoneNumber => throw _privateConstructorUsedError;
@@ -49,7 +49,7 @@ abstract class $PhoneNumberModelCopyWith<$Res> {
   ) = _$PhoneNumberModelCopyWithImpl<$Res, PhoneNumberModel>;
   @useResult
   $Res call({
-    int id,
+    String id,
     String name,
     @JsonKey(name: 'phone_number') String phoneNumber,
     String provider,
@@ -85,7 +85,7 @@ class _$PhoneNumberModelCopyWithImpl<$Res, $Val extends PhoneNumberModel>
             id: null == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
-                      as int,
+                      as String,
             name: null == name
                 ? _value.name
                 : name // ignore: cast_nullable_to_non_nullable
@@ -122,7 +122,7 @@ abstract class _$$PhoneNumberModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    int id,
+    String id,
     String name,
     @JsonKey(name: 'phone_number') String phoneNumber,
     String provider,
@@ -157,7 +157,7 @@ class __$$PhoneNumberModelImplCopyWithImpl<$Res>
         id: null == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
-                  as int,
+                  as String,
         name: null == name
             ? _value.name
             : name // ignore: cast_nullable_to_non_nullable
@@ -199,7 +199,7 @@ class _$PhoneNumberModelImpl extends _PhoneNumberModel {
       _$$PhoneNumberModelImplFromJson(json);
 
   @override
-  final int id;
+  final String id;
   @override
   final String name;
   @override
@@ -267,7 +267,7 @@ class _$PhoneNumberModelImpl extends _PhoneNumberModel {
 
 abstract class _PhoneNumberModel extends PhoneNumberModel {
   const factory _PhoneNumberModel({
-    required final int id,
+    required final String id,
     required final String name,
     @JsonKey(name: 'phone_number') required final String phoneNumber,
     required final String provider,
@@ -280,7 +280,7 @@ abstract class _PhoneNumberModel extends PhoneNumberModel {
       _$PhoneNumberModelImpl.fromJson;
 
   @override
-  int get id;
+  String get id;
   @override
   String get name;
   @override

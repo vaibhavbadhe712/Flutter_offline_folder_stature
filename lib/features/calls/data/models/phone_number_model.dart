@@ -9,7 +9,7 @@ part 'phone_number_model.g.dart';
 @freezed
 class PhoneNumberModel with _$PhoneNumberModel {
   const factory PhoneNumberModel({
-    required int id,
+    required String id,
     required String name,
     @JsonKey(name: 'phone_number') required String phoneNumber,
     required String provider,

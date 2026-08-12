@@ -17,7 +17,7 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$AssistantEntity {
-  int get id => throw _privateConstructorUsedError;
+  String get id => throw _privateConstructorUsedError;
   String get publicId => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   String get status => throw _privateConstructorUsedError;
@@ -25,7 +25,7 @@ mixin _$AssistantEntity {
   String get llmProvider => throw _privateConstructorUsedError;
   String get voiceProvider => throw _privateConstructorUsedError;
   bool get inboundEnabled => throw _privateConstructorUsedError;
-  int? get inboundPhoneNumberId => throw _privateConstructorUsedError;
+  String? get inboundPhoneNumberId => throw _privateConstructorUsedError;
   String get createdAt => throw _privateConstructorUsedError;
 
   /// Create a copy of AssistantEntity
@@ -43,7 +43,7 @@ abstract class $AssistantEntityCopyWith<$Res> {
   ) = _$AssistantEntityCopyWithImpl<$Res, AssistantEntity>;
   @useResult
   $Res call({
-    int id,
+    String id,
     String publicId,
     String name,
     String status,
@@ -51,7 +51,7 @@ abstract class $AssistantEntityCopyWith<$Res> {
     String llmProvider,
     String voiceProvider,
     bool inboundEnabled,
-    int? inboundPhoneNumberId,
+    String? inboundPhoneNumberId,
     String createdAt,
   });
 }
@@ -87,7 +87,7 @@ class _$AssistantEntityCopyWithImpl<$Res, $Val extends AssistantEntity>
             id: null == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
-                      as int,
+                      as String,
             publicId: null == publicId
                 ? _value.publicId
                 : publicId // ignore: cast_nullable_to_non_nullable
@@ -119,7 +119,7 @@ class _$AssistantEntityCopyWithImpl<$Res, $Val extends AssistantEntity>
             inboundPhoneNumberId: freezed == inboundPhoneNumberId
                 ? _value.inboundPhoneNumberId
                 : inboundPhoneNumberId // ignore: cast_nullable_to_non_nullable
-                      as int?,
+                      as String?,
             createdAt: null == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -140,7 +140,7 @@ abstract class _$$AssistantEntityImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    int id,
+    String id,
     String publicId,
     String name,
     String status,
@@ -148,7 +148,7 @@ abstract class _$$AssistantEntityImplCopyWith<$Res>
     String llmProvider,
     String voiceProvider,
     bool inboundEnabled,
-    int? inboundPhoneNumberId,
+    String? inboundPhoneNumberId,
     String createdAt,
   });
 }
@@ -183,7 +183,7 @@ class __$$AssistantEntityImplCopyWithImpl<$Res>
         id: null == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
-                  as int,
+                  as String,
         publicId: null == publicId
             ? _value.publicId
             : publicId // ignore: cast_nullable_to_non_nullable
@@ -215,7 +215,7 @@ class __$$AssistantEntityImplCopyWithImpl<$Res>
         inboundPhoneNumberId: freezed == inboundPhoneNumberId
             ? _value.inboundPhoneNumberId
             : inboundPhoneNumberId // ignore: cast_nullable_to_non_nullable
-                  as int?,
+                  as String?,
         createdAt: null == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -242,7 +242,7 @@ class _$AssistantEntityImpl implements _AssistantEntity {
   });
 
   @override
-  final int id;
+  final String id;
   @override
   final String publicId;
   @override
@@ -258,7 +258,7 @@ class _$AssistantEntityImpl implements _AssistantEntity {
   @override
   final bool inboundEnabled;
   @override
-  final int? inboundPhoneNumberId;
+  final String? inboundPhoneNumberId;
   @override
   final String createdAt;
 
@@ -320,7 +320,7 @@ class _$AssistantEntityImpl implements _AssistantEntity {
 
 abstract class _AssistantEntity implements AssistantEntity {
   const factory _AssistantEntity({
-    required final int id,
+    required final String id,
     required final String publicId,
     required final String name,
     required final String status,
@@ -328,12 +328,12 @@ abstract class _AssistantEntity implements AssistantEntity {
     required final String llmProvider,
     required final String voiceProvider,
     required final bool inboundEnabled,
-    final int? inboundPhoneNumberId,
+    final String? inboundPhoneNumberId,
     required final String createdAt,
   }) = _$AssistantEntityImpl;
 
   @override
-  int get id;
+  String get id;
   @override
   String get publicId;
   @override
@@ -349,7 +349,7 @@ abstract class _AssistantEntity implements AssistantEntity {
   @override
   bool get inboundEnabled;
   @override
-  int? get inboundPhoneNumberId;
+  String? get inboundPhoneNumberId;
   @override
   String get createdAt;
 

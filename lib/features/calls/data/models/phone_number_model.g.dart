@@ -9,7 +9,7 @@ part of 'phone_number_model.dart';
 _$PhoneNumberModelImpl _$$PhoneNumberModelImplFromJson(
   Map<String, dynamic> json,
 ) => _$PhoneNumberModelImpl(
-  id: (json['id'] as num).toInt(),
+  id: json['id'] as String,
   name: json['name'] as String,
   phoneNumber: json['phone_number'] as String,
   provider: json['provider'] as String,

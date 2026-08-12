@@ -5,7 +5,7 @@ part 'assistant_entity.freezed.dart';
 @freezed
 class AssistantEntity with _$AssistantEntity {
   const factory AssistantEntity({
-    required int id,
+    required String id,
     required String publicId,
     required String name,
     required String status,
@@ -13,7 +13,7 @@ class AssistantEntity with _$AssistantEntity {
     required String llmProvider,
     required String voiceProvider,
     required bool inboundEnabled,
-    int? inboundPhoneNumberId,
+    String? inboundPhoneNumberId,
     required String createdAt,
   }) = _AssistantEntity;
 }
