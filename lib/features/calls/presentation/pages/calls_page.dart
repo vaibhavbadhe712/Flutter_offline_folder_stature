@@ -18,6 +18,7 @@ import '../providers/start_call_provider.dart';
 import '../state/start_call_state.dart';
 import '../../../../core/utils/toast_services/toast_services.dart';
 import '../../../widgets/custom_shimmer.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 
 class _CampaignEntry {
   const _CampaignEntry({
@@ -565,7 +566,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
             }
 
             // Obtain the assistant's real ID by checking the loaded assistants list
-            int? assistantId;
+            String? assistantId;
             assistantsState.maybeWhen(
               loaded: (assistants) {
                 final match = assistants.firstWhere((a) => a.name == _selectedAssistant);
@@ -579,11 +580,18 @@ class _CallsPageState extends ConsumerState<CallsPage> {
               return;
             }
 
+            final authState = ref.read(authProvider);
+            final userId = authState.maybeWhen(
+              authenticated: (user) => user.id,
+              orElse: () => null,
+            );
+
             ref.read(startCallProvider.notifier).startTestCall(
               assistantId: assistantId!,
               toNumber: _selectedContact!.phoneNumber,
               phoneNumberId: _selectedOutbound!.id,
               contactId: _selectedContact!.id,
+              userId: userId,
             );
           }
         },

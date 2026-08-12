@@ -17,7 +17,7 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$ContactEntity {
-  int get id => throw _privateConstructorUsedError;
+  String get id => throw _privateConstructorUsedError;
   String get firstName => throw _privateConstructorUsedError;
   String get lastName => throw _privateConstructorUsedError;
   String get phoneNumber => throw _privateConstructorUsedError;
@@ -40,7 +40,7 @@ abstract class $ContactEntityCopyWith<$Res> {
   ) = _$ContactEntityCopyWithImpl<$Res, ContactEntity>;
   @useResult
   $Res call({
-    int id,
+    String id,
     String firstName,
     String lastName,
     String phoneNumber,
@@ -78,7 +78,7 @@ class _$ContactEntityCopyWithImpl<$Res, $Val extends ContactEntity>
             id: null == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
-                      as int,
+                      as String,
             firstName: null == firstName
                 ? _value.firstName
                 : firstName // ignore: cast_nullable_to_non_nullable
@@ -119,7 +119,7 @@ abstract class _$$ContactEntityImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    int id,
+    String id,
     String firstName,
     String lastName,
     String phoneNumber,
@@ -156,7 +156,7 @@ class __$$ContactEntityImplCopyWithImpl<$Res>
         id: null == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
-                  as int,
+                  as String,
         firstName: null == firstName
             ? _value.firstName
             : firstName // ignore: cast_nullable_to_non_nullable
@@ -200,7 +200,7 @@ class _$ContactEntityImpl implements _ContactEntity {
   });
 
   @override
-  final int id;
+  final String id;
   @override
   final String firstName;
   @override
@@ -260,7 +260,7 @@ class _$ContactEntityImpl implements _ContactEntity {
 
 abstract class _ContactEntity implements ContactEntity {
   const factory _ContactEntity({
-    required final int id,
+    required final String id,
     required final String firstName,
     required final String lastName,
     required final String phoneNumber,
@@ -270,7 +270,7 @@ abstract class _ContactEntity implements ContactEntity {
   }) = _$ContactEntityImpl;
 
   @override
-  int get id;
+  String get id;
   @override
   String get firstName;
   @override

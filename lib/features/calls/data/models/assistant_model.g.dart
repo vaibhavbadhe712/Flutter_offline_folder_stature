@@ -8,7 +8,7 @@ part of 'assistant_model.dart';
 
 _$AssistantModelImpl _$$AssistantModelImplFromJson(Map<String, dynamic> json) =>
     _$AssistantModelImpl(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       publicId: json['public_id'] as String,
       name: json['name'] as String,
       status: json['status'] as String,
@@ -16,7 +16,7 @@ _$AssistantModelImpl _$$AssistantModelImplFromJson(Map<String, dynamic> json) =>
       llmProvider: json['llm_provider'] as String,
       voiceProvider: json['voice_provider'] as String,
       inboundEnabled: json['inbound_enabled'] as bool,
-      inboundPhoneNumberId: (json['inbound_phone_number_id'] as num?)?.toInt(),
+      inboundPhoneNumberId: json['inbound_phone_number_id'] as String?,
       createdAt: json['created_at'] as String,
     );
 

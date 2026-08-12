@@ -21,10 +21,10 @@ class StartCallNotifier extends StateNotifier<StartCallState> {
   }) : super(const StartCallState.initial());
 
   Future<void> startTestCall({
-    required int assistantId,
+    required String assistantId,
     required String toNumber,
-    required int phoneNumberId,
-    required int contactId,
+    required String phoneNumberId,
+    required String contactId,
     String? userId,
   }) async {
     state = const StartCallState.loading();

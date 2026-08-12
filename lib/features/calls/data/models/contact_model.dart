@@ -9,7 +9,7 @@ part 'contact_model.g.dart';
 @freezed
 class ContactModel with _$ContactModel {
   const factory ContactModel({
-    required int id,
+    required String id,
     @JsonKey(name: 'first_name') required String firstName,
     @JsonKey(name: 'last_name') required String lastName,
     @JsonKey(name: 'phone_number') required String phoneNumber,

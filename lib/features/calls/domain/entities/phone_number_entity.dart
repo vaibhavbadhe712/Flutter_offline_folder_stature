@@ -5,7 +5,7 @@ part 'phone_number_entity.freezed.dart';
 @freezed
 class PhoneNumberEntity with _$PhoneNumberEntity {
   const factory PhoneNumberEntity({
-    required int id,
+    required String id,
     required String name,
     required String phoneNumber,
     required String provider,

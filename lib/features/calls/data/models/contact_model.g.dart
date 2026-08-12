@@ -8,7 +8,7 @@ part of 'contact_model.dart';
 
 _$ContactModelImpl _$$ContactModelImplFromJson(Map<String, dynamic> json) =>
     _$ContactModelImpl(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       firstName: json['first_name'] as String,
       lastName: json['last_name'] as String,
       phoneNumber: json['phone_number'] as String,
