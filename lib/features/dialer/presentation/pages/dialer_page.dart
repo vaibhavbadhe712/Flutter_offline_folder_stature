@@ -1,82 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/constants/app_colors.dart';
 import '../../../widgets/custom_card.dart';
 import '../../../widgets/dashed_border_container.dart';
 import '../../../widgets/segmented_toggle.dart';
+import '../../../widgets/custom_shimmer.dart';
+import '../../../calls/domain/entities/contact_entity.dart';
+import '../../../calls/presentation/providers/contacts_provider.dart';
+import '../../../calls/presentation/state/contacts_state.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 
-const _phoneNumberColor = Color(0xFFC17B6B);
-
-class _ContactEntry {
-  const _ContactEntry({
-    required this.initials,
-    required this.avatarBg,
-    required this.avatarText,
-    required this.name,
-    required this.phone,
-  });
-
-  final String initials;
-  final Color avatarBg;
-  final Color avatarText;
-  final String name;
-  final String phone;
-}
-
-const _contacts = [
-  _ContactEntry(
-    initials: 'RD',
-    avatarBg: Color(0xFFE0E7FF),
-    avatarText: Color(0xFF4F46E5),
-    name: 'Rohan Deshmukh',
-    phone: '+91 98200 11223',
-  ),
-  _ContactEntry(
-    initials: 'AK',
-    avatarBg: Color(0xFFF3E8FF),
-    avatarText: Color(0xFF9333EA),
-    name: 'Ayesha Khan',
-    phone: '+91 90040 55621',
-  ),
-  _ContactEntry(
-    initials: 'VN',
-    avatarBg: Color(0xFFFEE2E2),
-    avatarText: Color(0xFFDC2626),
-    name: 'Vikram Nair',
-    phone: '+91 99870 34210',
-  ),
-  _ContactEntry(
-    initials: 'PS',
-    avatarBg: Color(0xFFE0F2FE),
-    avatarText: Color(0xFF0284C7),
-    name: 'Priya Sharma',
-    phone: '+91 87654 90012',
-  ),
-  _ContactEntry(
-    initials: 'KM',
-    avatarBg: Color(0xFFE0F8E8),
-    avatarText: Color(0xFF16A34A),
-    name: 'Karan Mehta',
-    phone: '+91 96540 11002',
-  ),
-  _ContactEntry(
-    initials: 'SP',
-    avatarBg: Color(0xFFEDE9FE),
-    avatarText: Color(0xFF6D28D9),
-    name: 'Sneha Patil',
-    phone: '+91 88990 22114',
-  ),
-];
-
+const _phoneNumberColor = AppColors.phoneNumberColor;
 const _keypadKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#'];
 
-class DialerPage extends StatefulWidget {
+class DialerPage extends ConsumerStatefulWidget {
   const DialerPage({super.key});
 
   @override
-  State<DialerPage> createState() => _DialerPageState();
+  ConsumerState<DialerPage> createState() => _DialerPageState();
 }
 
-class _DialerPageState extends State<DialerPage> {
+class _DialerPageState extends ConsumerState<DialerPage> {
   bool _isContactsMode = false;
   String _dialedNumber = '';
 
@@ -90,6 +34,7 @@ class _DialerPageState extends State<DialerPage> {
 
   @override
   Widget build(BuildContext context) {
+    final contactsState = ref.watch(contactsProvider);
     return Scaffold(
       backgroundColor: AppColors.whiteColor,
       body: SafeArea(
@@ -107,10 +52,20 @@ class _DialerPageState extends State<DialerPage> {
               SegmentedToggle(
                 labels: const ['Dialer Pad', 'Contacts'],
                 selectedIndex: _isContactsMode ? 1 : 0,
-                onChanged: (index) => setState(() => _isContactsMode = index == 1),
+                onChanged: (index) {
+                  setState(() => _isContactsMode = index == 1);
+                  if (index == 1) {
+                    final authState = ref.read(authProvider);
+                    final userId = authState.maybeWhen(
+                      authenticated: (user) => user.id,
+                      orElse: () => null,
+                    );
+                    ref.read(contactsProvider.notifier).fetchContacts(userId: userId);
+                  }
+                },
               ),
               const SizedBox(height: 20),
-              if (_isContactsMode) ..._buildContactsView() else ..._buildDialerPadView(),
+              if (_isContactsMode) ..._buildContactsView(contactsState) else ..._buildDialerPadView(),
               const SizedBox(height: 16),
               _buildSimulateIncomingButton(),
               const SizedBox(height: 16),
@@ -191,33 +146,81 @@ class _DialerPageState extends State<DialerPage> {
     );
   }
 
-  List<Widget> _buildContactsView() {
+  List<Widget> _buildContactsView(ContactsState contactsState) {
     return [
-      CustomCard(
-        padding: EdgeInsets.zero,
-        child: Column(
-          children: [
-            for (var i = 0; i < _contacts.length; i++) ...[
-              _buildContactRow(_contacts[i]),
-              if (i != _contacts.length - 1) const Divider(height: 1, color: AppColors.whiteColor),
-            ],
-          ],
+      contactsState.when(
+        initial: () => _buildContactsShimmer(),
+        loading: () => _buildContactsShimmer(),
+        error: (message) => CustomCard(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Text(
+                  'Error loading contacts: $message',
+                  style: const TextStyle(color: AppColors.noticeRedText, fontSize: 14),
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: () => ref.read(contactsProvider.notifier).fetchContacts(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
         ),
+        loaded: (contactsList) {
+          if (contactsList.isEmpty) {
+            return const CustomCard(
+              child: Padding(
+                padding: EdgeInsets.all(32),
+                child: Center(
+                  child: Text(
+                    'No contacts found',
+                    style: TextStyle(color: AppColors.black, fontSize: 14),
+                  ),
+                ),
+              ),
+            );
+          }
+
+          return CustomCard(
+            padding: EdgeInsets.zero,
+            child: Column(
+              children: [
+                for (var i = 0; i < contactsList.length; i++) ...[
+                  _buildContactRow(contactsList[i], i),
+                  if (i != contactsList.length - 1) const Divider(height: 1, color: AppColors.whiteColor),
+                ],
+              ],
+            ),
+          );
+        },
       ),
     ];
   }
 
-  Widget _buildContactRow(_ContactEntry contact) {
+  Widget _buildContactRow(ContactEntity contact, int index) {
+    final String initials = ((contact.firstName.isNotEmpty ? contact.firstName[0] : '') +
+                            (contact.lastName.isNotEmpty ? contact.lastName[0] : '')).toUpperCase();
+    final String fullName = '${contact.firstName} ${contact.lastName}'.trim();
+    final String nameToShow = fullName.isEmpty ? 'Unknown Contact' : fullName;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         children: [
           CircleAvatar(
             radius: 20,
-            backgroundColor: contact.avatarBg,
+            backgroundColor: _getAvatarBgColor(index),
             child: Text(
-              contact.initials,
-              style: TextStyle(color: contact.avatarText, fontWeight: FontWeight.bold, fontSize: 14),
+              initials.isEmpty ? '?' : initials,
+              style: TextStyle(color: _getAvatarTextColor(index), fontWeight: FontWeight.bold, fontSize: 14),
             ),
           ),
           const SizedBox(width: 12),
@@ -226,12 +229,12 @@ class _DialerPageState extends State<DialerPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  contact.name,
+                  nameToShow,
                   style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.black),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  contact.phone,
+                  contact.phoneNumber,
                   style: const TextStyle(fontSize: 12, color: AppColors.black),
                 ),
               ],
@@ -242,13 +245,74 @@ class _DialerPageState extends State<DialerPage> {
             shape: const CircleBorder(),
             child: InkWell(
               customBorder: const CircleBorder(),
-              onTap: () => _callNumber(contact.phone),
+              onTap: () => _callNumber(contact.phoneNumber),
               child: const Padding(
                 padding: EdgeInsets.all(10),
                 child: Icon(Icons.phone_outlined, size: 18, color: Color(0xFF16A34A)),
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Color _getAvatarBgColor(int index) {
+    final colors = [
+      AppColors.avatarIndigoBg,
+      AppColors.avatarSkyBg,
+      AppColors.avatarVioletBg,
+      AppColors.noticeYellowBg,
+      AppColors.noticeRedBg,
+      AppColors.mintGreen,
+    ];
+    return colors[index % colors.length];
+  }
+
+  Color _getAvatarTextColor(int index) {
+    final colors = [
+      AppColors.avatarIndigoText,
+      AppColors.avatarSkyText,
+      AppColors.avatarVioletText,
+      AppColors.noticeYellowText,
+      AppColors.noticeRedText,
+      AppColors.emeraldGreen,
+    ];
+    return colors[index % colors.length];
+  }
+
+  Widget _buildContactsShimmer() {
+    return CustomCard(
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          for (var i = 0; i < 4; i++) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                children: [
+                  const CustomShimmer.circular(size: 40),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomShimmer.rectangular(width: 120, height: 14),
+                        SizedBox(height: 6),
+                        CustomShimmer.rectangular(width: 160, height: 11),
+                      ],
+                    ),
+                  ),
+                  CustomShimmer.rectangular(
+                    width: 38,
+                    height: 38,
+                    borderRadius: BorderRadius.circular(19),
+                  ),
+                ],
+              ),
+            ),
+            if (i != 3) const Divider(height: 1, color: AppColors.whiteColor),
+          ],
         ],
       ),
     );

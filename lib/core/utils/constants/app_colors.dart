@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class AppColors {
   const AppColors._();
   static const Color fromfildbgColor = Color(0x1AFFFFFF);
+  static const Color phoneNumberColor = Color(0xFFC17B6B);
   static const Color violetPurple = Color(0xFF8B5CF6);
   static const Color deepOrange = Color(0xFFEA580C);
   static const Color darkSlate = Color(0xFF1E293B);
