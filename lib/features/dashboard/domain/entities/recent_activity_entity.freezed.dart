@@ -17,7 +17,7 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$RecentActivityEntity {
-  int get id => throw _privateConstructorUsedError;
+  String get id => throw _privateConstructorUsedError;
   String get assistantName => throw _privateConstructorUsedError;
   String get contactInfo => throw _privateConstructorUsedError;
   String get fromNumber => throw _privateConstructorUsedError;
@@ -45,7 +45,7 @@ abstract class $RecentActivityEntityCopyWith<$Res> {
   ) = _$RecentActivityEntityCopyWithImpl<$Res, RecentActivityEntity>;
   @useResult
   $Res call({
-    int id,
+    String id,
     String assistantName,
     String contactInfo,
     String fromNumber,
@@ -96,7 +96,7 @@ class _$RecentActivityEntityCopyWithImpl<
             id: null == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
-                      as int,
+                      as String,
             assistantName: null == assistantName
                 ? _value.assistantName
                 : assistantName // ignore: cast_nullable_to_non_nullable
@@ -157,7 +157,7 @@ abstract class _$$RecentActivityEntityImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    int id,
+    String id,
     String assistantName,
     String contactInfo,
     String fromNumber,
@@ -204,7 +204,7 @@ class __$$RecentActivityEntityImplCopyWithImpl<$Res>
         id: null == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
-                  as int,
+                  as String,
         assistantName: null == assistantName
             ? _value.assistantName
             : assistantName // ignore: cast_nullable_to_non_nullable
@@ -273,7 +273,7 @@ class _$RecentActivityEntityImpl implements _RecentActivityEntity {
   });
 
   @override
-  final int id;
+  final String id;
   @override
   final String assistantName;
   @override
@@ -361,7 +361,7 @@ class _$RecentActivityEntityImpl implements _RecentActivityEntity {
 
 abstract class _RecentActivityEntity implements RecentActivityEntity {
   const factory _RecentActivityEntity({
-    required final int id,
+    required final String id,
     required final String assistantName,
     required final String contactInfo,
     required final String fromNumber,
@@ -376,7 +376,7 @@ abstract class _RecentActivityEntity implements RecentActivityEntity {
   }) = _$RecentActivityEntityImpl;
 
   @override
-  int get id;
+  String get id;
   @override
   String get assistantName;
   @override

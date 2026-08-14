@@ -9,7 +9,7 @@ part of 'recent_activity_model.dart';
 _$RecentActivityModelImpl _$$RecentActivityModelImplFromJson(
   Map<String, dynamic> json,
 ) => _$RecentActivityModelImpl(
-  id: (json['id'] as num).toInt(),
+  id: json['id'] as String,
   assistantName: json['assistant_name'] as String?,
   contactInfo: json['contact_info'] as String?,
   fromNumber: json['from_number'] as String?,
