@@ -21,7 +21,7 @@ RecentActivityModel _$RecentActivityModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$RecentActivityModel {
-  int get id => throw _privateConstructorUsedError;
+  String get id => throw _privateConstructorUsedError;
   @JsonKey(name: 'assistant_name')
   String? get assistantName => throw _privateConstructorUsedError;
   @JsonKey(name: 'contact_info')
@@ -59,7 +59,7 @@ abstract class $RecentActivityModelCopyWith<$Res> {
   ) = _$RecentActivityModelCopyWithImpl<$Res, RecentActivityModel>;
   @useResult
   $Res call({
-    int id,
+    String id,
     @JsonKey(name: 'assistant_name') String? assistantName,
     @JsonKey(name: 'contact_info') String? contactInfo,
     @JsonKey(name: 'from_number') String? fromNumber,
@@ -107,7 +107,7 @@ class _$RecentActivityModelCopyWithImpl<$Res, $Val extends RecentActivityModel>
             id: null == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
-                      as int,
+                      as String,
             assistantName: freezed == assistantName
                 ? _value.assistantName
                 : assistantName // ignore: cast_nullable_to_non_nullable
@@ -168,7 +168,7 @@ abstract class _$$RecentActivityModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    int id,
+    String id,
     @JsonKey(name: 'assistant_name') String? assistantName,
     @JsonKey(name: 'contact_info') String? contactInfo,
     @JsonKey(name: 'from_number') String? fromNumber,
@@ -215,7 +215,7 @@ class __$$RecentActivityModelImplCopyWithImpl<$Res>
         id: null == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
-                  as int,
+                  as String,
         assistantName: freezed == assistantName
             ? _value.assistantName
             : assistantName // ignore: cast_nullable_to_non_nullable
@@ -287,7 +287,7 @@ class _$RecentActivityModelImpl extends _RecentActivityModel {
       _$$RecentActivityModelImplFromJson(json);
 
   @override
-  final int id;
+  final String id;
   @override
   @JsonKey(name: 'assistant_name')
   final String? assistantName;
@@ -387,7 +387,7 @@ class _$RecentActivityModelImpl extends _RecentActivityModel {
 
 abstract class _RecentActivityModel extends RecentActivityModel {
   const factory _RecentActivityModel({
-    required final int id,
+    required final String id,
     @JsonKey(name: 'assistant_name') final String? assistantName,
     @JsonKey(name: 'contact_info') final String? contactInfo,
     @JsonKey(name: 'from_number') final String? fromNumber,
@@ -406,7 +406,7 @@ abstract class _RecentActivityModel extends RecentActivityModel {
       _$RecentActivityModelImpl.fromJson;
 
   @override
-  int get id;
+  String get id;
   @override
   @JsonKey(name: 'assistant_name')
   String? get assistantName;

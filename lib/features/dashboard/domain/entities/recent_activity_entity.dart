@@ -5,7 +5,7 @@ part 'recent_activity_entity.freezed.dart';
 @freezed
 class RecentActivityEntity with _$RecentActivityEntity {
   const factory RecentActivityEntity({
-    required int id,
+    required String id,
     required String assistantName,
     required String contactInfo,
     required String fromNumber,

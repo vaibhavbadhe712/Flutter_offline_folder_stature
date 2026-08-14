@@ -9,7 +9,7 @@ part 'recent_activity_model.g.dart';
 @freezed
 class RecentActivityModel with _$RecentActivityModel {
   const factory RecentActivityModel({
-    required int id,
+    required String id,
     @JsonKey(name: 'assistant_name') String? assistantName,
     @JsonKey(name: 'contact_info') String? contactInfo,
     @JsonKey(name: 'from_number') String? fromNumber,

@@ -51,7 +51,7 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
     final response = await _dioClient.get(
       path,
       queryParameters: {
-        'config_type': 'custom',
+        'config_type': 'default',
       },
     );
     
