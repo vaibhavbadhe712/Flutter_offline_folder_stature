@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/utils/constants/app_colors.dart';
 
 /// Shared white rounded-corner card used across feature pages so every
 /// section (stat blocks, form panels, list containers) shares one look.
@@ -24,13 +25,13 @@ class CustomCard extends StatelessWidget {
       margin: margin,
       padding: padding,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        border: Border.all(color: AppColors.statCardBorder),
         boxShadow: showShadow
             ? [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.015),
+                  color: AppColors.black.withValues(alpha: 0.015),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),

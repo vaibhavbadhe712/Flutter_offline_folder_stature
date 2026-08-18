@@ -24,22 +24,28 @@ class DashboardPage extends ConsumerWidget {
     );
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FC),
+      backgroundColor: AppColors.screenbgColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF8F9FC),
+        backgroundColor: AppColors.screenbgColor,
         elevation: 0,
         scrolledUnderElevation: 0,
+        shape: const Border(
+          bottom: BorderSide(
+            color: AppColors.fieldBorderColor,
+            width: 1,
+          ),
+        ),
         title: const Text(
           'Dashboard',
           style: TextStyle(
-            color: Color(0xFF0F172A),
+            color: AppColors.darkSlate,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none_outlined, color: Color(0xFF334155), size: 26),
+            icon: const Icon(Icons.notifications_none_outlined, color: AppColors.greyTextColor, size: 26),
             onPressed: () {},
           ),
           const SizedBox(width: 8),
@@ -73,7 +79,7 @@ class DashboardPage extends ConsumerWidget {
                       Text(
                         _getGreeting(),
                         style: const TextStyle(
-                          color: Color(0xFF64748B),
+                          color: AppColors.greyText,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
@@ -82,7 +88,7 @@ class DashboardPage extends ConsumerWidget {
                       Text(
                         userName,
                         style: const TextStyle(
-                          color: Color(0xFF0F172A),
+                          color: AppColors.darkSlate,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
@@ -91,39 +97,30 @@ class DashboardPage extends ConsumerWidget {
                   ),
                   // Wallet chip
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.white,
                       borderRadius: BorderRadius.circular(30),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      border: Border.all(color: AppColors.fieldBorderColor),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.02),
+                          color: AppColors.black.withValues(alpha: 0.02),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
                       ],
                     ),
-                    child: Row(
+                    child: const Row(
                       children: [
-                        const Icon(Icons.account_balance_wallet_outlined, color: Color(0xFF4F46E5), size: 20),
-                        const SizedBox(width: 6),
-                        const Text(
+                        Icon(Icons.account_balance_wallet_outlined, color: AppColors.statCardCallsIcon, size: 20),
+                        SizedBox(width: 6),
+                        Text(
                           '₹4,230.5',
                           style: TextStyle(
-                            color: Color(0xFF1E293B),
+                            color: AppColors.statCardValue,
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
-                        ),
-                        const SizedBox(width: 6),
-                        Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF4F46E5),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.add, color: Colors.white, size: 12),
                         ),
                       ],
                     ),
@@ -136,7 +133,7 @@ class DashboardPage extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
+                  color: AppColors.statCardBorder,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -152,12 +149,12 @@ class DashboardPage extends ConsumerWidget {
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           decoration: BoxDecoration(
-                            color: isSelected ? Colors.white : Colors.transparent,
+                            color: isSelected ? AppColors.white : AppColors.transparent,
                             borderRadius: BorderRadius.circular(8),
                             boxShadow: isSelected
                                 ? [
                                     BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.05),
+                                      color: AppColors.black.withValues(alpha: 0.05),
                                       blurRadius: 4,
                                       offset: const Offset(0, 2),
                                     ),
@@ -168,7 +165,7 @@ class DashboardPage extends ConsumerWidget {
                             child: Text(
                               timeframe,
                               style: TextStyle(
-                                color: isSelected ? const Color(0xFF4F46E5) : const Color(0xFF64748B),
+                                color: isSelected ? AppColors.statCardCallsIcon : AppColors.greyText,
                                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                                 fontSize: 13,
                               ),
@@ -254,7 +251,7 @@ class DashboardPage extends ConsumerWidget {
                   const Text(
                     'Recent Activity',
                     style: TextStyle(
-                      color: Color(0xFF0F172A),
+                      color: AppColors.darkSlate,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -264,7 +261,7 @@ class DashboardPage extends ConsumerWidget {
                     child: const Text(
                       'View all',
                       style: TextStyle(
-                        color: Color(0xFF4F46E5),
+                        color: AppColors.statCardCallsIcon,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -288,13 +285,21 @@ class DashboardPage extends ConsumerWidget {
                       children: [
                         Text(
                           'Error: $message',
-                          style: const TextStyle(color: Color(0xFFDC2626), fontSize: 12),
+                          style: const TextStyle(color: AppColors.noticeRedText, fontSize: 12),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 8),
                         TextButton(
-                          onPressed: () => ref.read(recentActivityProvider.notifier).fetchRecentActivity(),
-                          child: const Text('Retry', style: TextStyle(fontSize: 12, color: Color(0xFF4F46E5))),
+                          onPressed: () {
+                            final userId = authState.maybeWhen(
+                              authenticated: (user) => user.id,
+                              orElse: () => null,
+                            );
+                            ref
+                                .read(recentActivityProvider.notifier)
+                                .fetchRecentActivity(userId: userId);
+                          },
+                          child: const Text('Retry', style: TextStyle(fontSize: 12, color: AppColors.statCardCallsIcon)),
                         ),
                       ],
                     ),
@@ -313,6 +318,11 @@ class DashboardPage extends ConsumerWidget {
                               width: 180,
                               height: 150,
                               fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) => const Icon(
+                                Icons.inbox_outlined,
+                                size: 64,
+                                color: AppColors.greyText,
+                              ),
                             ),
                             const SizedBox(height: 16),
                             const Text(

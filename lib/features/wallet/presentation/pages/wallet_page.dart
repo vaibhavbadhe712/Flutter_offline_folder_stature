@@ -137,7 +137,7 @@ class _WalletPageState extends State<WalletPage> {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF6D28D9), Color(0xFF4F46E5)],
+          colors: [AppColors.avatarVioletText, AppColors.statCardCallsIcon],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -148,17 +148,17 @@ class _WalletPageState extends State<WalletPage> {
         children: [
           Text(
             'Available Balance',
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 14, fontWeight: FontWeight.w500),
+            style: TextStyle(color: AppColors.white.withValues(alpha: 0.75), fontSize: 14, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
           const Text(
             _balance,
-            style: TextStyle(color: Colors.white, fontSize: 34, fontWeight: FontWeight.bold),
+            style: TextStyle(color: AppColors.white, fontSize: 34, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
             'Auto low-balance alerts below ₹500',
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 12),
+            style: TextStyle(color: AppColors.white.withValues(alpha: 0.75), fontSize: 12),
           ),
           const SizedBox(height: 20),
           SizedBox(
@@ -166,8 +166,8 @@ class _WalletPageState extends State<WalletPage> {
             height: 48,
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white.withValues(alpha: 0.2),
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.white.withValues(alpha: 0.2),
+                foregroundColor: AppColors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
@@ -205,7 +205,7 @@ class _WalletPageState extends State<WalletPage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  border: Border.all(color: AppColors.fieldBorderColor),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -233,7 +233,7 @@ class _WalletPageState extends State<WalletPage> {
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.white,
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -256,9 +256,9 @@ class _WalletPageState extends State<WalletPage> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryLight : Colors.white,
+          color: isSelected ? AppColors.primaryLight : AppColors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? AppColors.primary : const Color(0xFFE2E8F0)),
+          border: Border.all(color: isSelected ? AppColors.primary : AppColors.fieldBorderColor),
         ),
         child: Center(
           child: Text(
@@ -278,7 +278,7 @@ class _WalletPageState extends State<WalletPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
+        color: AppColors.statCardBorder,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -325,7 +325,7 @@ class _WalletPageState extends State<WalletPage> {
               amount: transactions[i].amount,
               isCredit: transactions[i].isCredit,
             ),
-            if (i != transactions.length - 1) const Divider(height: 1, color: Color(0xFFF1F5F9)),
+            if (i != transactions.length - 1) const Divider(height: 1, color: AppColors.statCardBorder),
           ],
         ],
       ),

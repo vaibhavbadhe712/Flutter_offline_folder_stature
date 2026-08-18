@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/utils/constants/app_colors.dart';
 
 /// Rounded container with a dashed outline, used for upload/drop targets.
 class DashedBorderContainer extends StatelessWidget {
@@ -6,7 +7,7 @@ class DashedBorderContainer extends StatelessWidget {
     super.key,
     required this.child,
     this.borderRadius = 16,
-    this.color = const Color(0xFFCBD5E1),
+    this.color = AppColors.lightGrey,
   });
 
   final Widget child;

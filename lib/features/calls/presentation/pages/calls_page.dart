@@ -152,7 +152,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
                         Text(
                           'Error: $message',
                           style: const TextStyle(
-                            color: Color(0xFFDC2626),
+                            color: AppColors.noticeRedText,
                             fontSize: 12,
                           ),
                           textAlign: TextAlign.center,
@@ -173,7 +173,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
                             'Retry',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Color(0xFF4F46E5),
+                              color: AppColors.statCardCallsIcon,
                             ),
                           ),
                         ),
@@ -328,16 +328,16 @@ class _CallsPageState extends ConsumerState<CallsPage> {
           width: double.infinity,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFFFEF2F2),
+            color: AppColors.noticeRedBg,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFFCA5A5)),
+            border: Border.all(color: AppColors.priorityHigh),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Error loading numbers: $message',
-                style: const TextStyle(color: Color(0xFF991B1B), fontSize: 13),
+                style: const TextStyle(color: AppColors.statusNegativeText, fontSize: 13),
               ),
               const SizedBox(height: 4),
               TextButton(
@@ -353,7 +353,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFDC2626),
+                    color: AppColors.noticeRedText,
                   ),
                 ),
               ),

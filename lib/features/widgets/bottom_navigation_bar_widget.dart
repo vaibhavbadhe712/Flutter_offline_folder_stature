@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/utils/constants/app_colors.dart';
 import 'navigation_controller.dart';
 
 class BottomNavigationBarWidget extends ConsumerWidget {
@@ -49,13 +50,13 @@ class BottomNavigationBarWidget extends ConsumerWidget {
     if (!navState.isNavVisible) return const SizedBox.shrink();
 
     final isDark = theme.brightness == Brightness.dark;
-    final navBarSelectedColor = isDark ? const Color(0xFF00B0FF) : const Color(0xFF0288D1);
+    final navBarSelectedColor = isDark ? AppColors.blue : AppColors.blueColor;
 
     return Container(
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: AppColors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),

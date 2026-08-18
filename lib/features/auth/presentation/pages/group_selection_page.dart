@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../core/storage/secure_storage_service.dart';
+import '../../../../core/utils/constants/app_colors.dart';
 
 class GroupSelectionPage extends ConsumerStatefulWidget {
   const GroupSelectionPage({super.key});
@@ -89,14 +90,14 @@ class _GroupSelectionPageState extends ConsumerState<GroupSelectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 1,
         title: const Text(
           'Select Workspace',
           style: TextStyle(
-            color: Color(0xFF0F172A),
+            color: AppColors.darkSlate,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -104,7 +105,7 @@ class _GroupSelectionPageState extends ConsumerState<GroupSelectionPage> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: Color(0xFF4F46E5)),
+            icon: const Icon(Icons.refresh_rounded, color: AppColors.statCardCallsIcon),
             onPressed: _isLoading ? null : _fetchGroups,
           ),
         ],
@@ -119,7 +120,7 @@ class _GroupSelectionPageState extends ConsumerState<GroupSelectionPage> {
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4F46E5)),
+          valueColor: AlwaysStoppedAnimation<Color>(AppColors.statCardCallsIcon),
         ),
       );
     }
@@ -131,19 +132,19 @@ class _GroupSelectionPageState extends ConsumerState<GroupSelectionPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline_rounded, size: 64, color: Colors.redAccent),
+              const Icon(Icons.error_outline_rounded, size: 64, color: AppColors.errorRed),
               const SizedBox(height: 16),
               Text(
                 _errorMessage!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 15, color: Color(0xFF64748B)),
+                style: const TextStyle(fontSize: 15, color: AppColors.greyText),
               ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _fetchGroups,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4F46E5),
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.statCardCallsIcon,
+                  foregroundColor: AppColors.white,
                 ),
                 child: const Text('Try Again'),
               ),
@@ -160,19 +161,19 @@ class _GroupSelectionPageState extends ConsumerState<GroupSelectionPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.group_work_outlined, size: 64, color: Color(0xFF94A3B8)),
+              const Icon(Icons.group_work_outlined, size: 64, color: AppColors.statCardTitle),
               const SizedBox(height: 16),
               const Text(
                 'No workspaces found for your account.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 15, color: Color(0xFF64748B)),
+                style: TextStyle(fontSize: 15, color: AppColors.greyText),
               ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _fetchGroups,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4F46E5),
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.statCardCallsIcon,
+                  foregroundColor: AppColors.white,
                 ),
                 child: const Text('Refresh'),
               ),
@@ -202,12 +203,12 @@ class _GroupSelectionPageState extends ConsumerState<GroupSelectionPage> {
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+            border: Border.all(color: AppColors.fieldBorderColor),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.02),
+                color: AppColors.black.withValues(alpha: 0.02),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -232,7 +233,7 @@ class _GroupSelectionPageState extends ConsumerState<GroupSelectionPage> {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF0F172A),
+                          color: AppColors.darkSlate,
                         ),
                       ),
                       if (orgnType.isNotEmpty || designation.isNotEmpty) ...[
@@ -241,7 +242,7 @@ class _GroupSelectionPageState extends ConsumerState<GroupSelectionPage> {
                           [orgnType, designation].where((e) => e.isNotEmpty).join(' • '),
                           style: const TextStyle(
                             fontSize: 13,
-                            color: Color(0xFF4F46E5),
+                            color: AppColors.statCardCallsIcon,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -250,14 +251,14 @@ class _GroupSelectionPageState extends ConsumerState<GroupSelectionPage> {
                         const SizedBox(height: 6),
                         Row(
                           children: [
-                            const Icon(Icons.location_on_outlined, size: 14, color: Color(0xFF94A3B8)),
+                            const Icon(Icons.location_on_outlined, size: 14, color: AppColors.statCardTitle),
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
                                 address,
                                 style: const TextStyle(
                                   fontSize: 12,
-                                  color: Color(0xFF64748B),
+                                  color: AppColors.greyText,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -276,8 +277,8 @@ class _GroupSelectionPageState extends ConsumerState<GroupSelectionPage> {
                   child: ElevatedButton(
                     onPressed: () => _selectGroup(id, orgnName),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4F46E5),
-                      foregroundColor: Colors.white,
+                      backgroundColor: AppColors.statCardCallsIcon,
+                      foregroundColor: AppColors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
@@ -308,7 +309,7 @@ class _GroupSelectionPageState extends ConsumerState<GroupSelectionPage> {
         height: 50,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFF1F5F9)),
+          border: Border.all(color: AppColors.statCardBorder),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
@@ -339,7 +340,7 @@ class _GroupSelectionPageState extends ConsumerState<GroupSelectionPage> {
       width: 50,
       height: 50,
       decoration: BoxDecoration(
-        color: const Color(0xFFEEF2F6),
+        color: AppColors.statCardCallsBg,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Center(
@@ -348,7 +349,7 @@ class _GroupSelectionPageState extends ConsumerState<GroupSelectionPage> {
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF4F46E5),
+            color: AppColors.statCardCallsIcon,
           ),
         ),
       ),
