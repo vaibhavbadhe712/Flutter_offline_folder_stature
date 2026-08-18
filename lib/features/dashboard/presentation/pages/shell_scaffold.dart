@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/utils/constants/app_colors.dart';
 
 /// Navigation layout wrapper containing the BottomNavigationBar for Shell routing.
 class ShellScaffold extends StatelessWidget {
@@ -29,7 +30,7 @@ class ShellScaffold extends StatelessWidget {
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final navBarSelectedColor = isDark ? const Color(0xFF00B0FF) : const Color(0xFF0288D1);
+    final navBarSelectedColor = isDark ? AppColors.blue : AppColors.blueColor;
 
     return Scaffold(
       body: child,
@@ -42,7 +43,7 @@ class ShellScaffold extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
+              color: AppColors.black.withValues(alpha: 0.06),
               blurRadius: 12,
               offset: const Offset(0, -4),
             ),
@@ -57,7 +58,7 @@ class ShellScaffold extends StatelessWidget {
             elevation: 0,
             currentIndex: selectedIndex,
             type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.transparent,
+            backgroundColor: AppColors.transparent,
             selectedItemColor: navBarSelectedColor,
             unselectedItemColor: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
           selectedLabelStyle: const TextStyle(

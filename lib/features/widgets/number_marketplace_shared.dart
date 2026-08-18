@@ -20,9 +20,9 @@ class RegionPickerSheet extends StatelessWidget {
   final String selected;
 
   const RegionPickerSheet({super.key, required this.regions, required this.selected});
-  static const Color _sheetBg = Color(0xFF1E2430);
-  static const Color _sheetDivider = Color(0xFF323A48);
-  static const Color _radioOn = Color(0xFFF59E0B);
+  static const Color _sheetBg = AppColors.cardBackgroundColor;
+  static const Color _sheetDivider = AppColors.divideColor;
+  static const Color _radioOn = AppColors.orangeColor;
 
   static Future<String?> show(
     BuildContext context, {

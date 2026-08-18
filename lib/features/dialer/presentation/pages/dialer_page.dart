@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/constants/app_colors.dart';
 import '../../../widgets/custom_card.dart';
-import '../../../widgets/dashed_border_container.dart';
 import '../../../widgets/segmented_toggle.dart';
 import '../../../widgets/custom_shimmer.dart';
 import '../../../calls/domain/entities/contact_entity.dart';
@@ -10,7 +9,6 @@ import '../../../calls/presentation/providers/contacts_provider.dart';
 import '../../../calls/presentation/state/contacts_state.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 
-const _phoneNumberColor = AppColors.phoneNumberColor;
 const _keypadKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#'];
 
 class DialerPage extends ConsumerStatefulWidget {
@@ -66,9 +64,9 @@ class _DialerPageState extends ConsumerState<DialerPage> {
               ),
               const SizedBox(height: 20),
               if (_isContactsMode) ..._buildContactsView(contactsState) else ..._buildDialerPadView(),
-              const SizedBox(height: 16),
-              _buildSimulateIncomingButton(),
-              const SizedBox(height: 16),
+              // const SizedBox(height: 16),
+              // _buildSimulateIncomingButton(),
+              // const SizedBox(height: 16),
             ],
           ),
         ),
@@ -241,14 +239,14 @@ class _DialerPageState extends ConsumerState<DialerPage> {
             ),
           ),
           Material(
-            color: const Color(0xFFDCFCE7),
+            color: AppColors.mintGreen,
             shape: const CircleBorder(),
             child: InkWell(
               customBorder: const CircleBorder(),
               onTap: () => _callNumber(contact.phoneNumber),
               child: const Padding(
                 padding: EdgeInsets.all(10),
-                child: Icon(Icons.phone_outlined, size: 18, color: Color(0xFF16A34A)),
+                child: Icon(Icons.phone_outlined, size: 18, color: AppColors.greenColor),
               ),
             ),
           ),
@@ -318,31 +316,31 @@ class _DialerPageState extends ConsumerState<DialerPage> {
     );
   }
 
-  Widget _buildSimulateIncomingButton() {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: () => _showSnack('Simulating incoming call…'),
-        child: DashedBorderContainer(
-          borderRadius: 14,
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.phone_callback_outlined, size: 18, color: AppColors.primary),
-                SizedBox(width: 8),
-                Text(
-                  'Simulate Incoming Call (demo)',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildSimulateIncomingButton() {
+  //   return Material(
+  //     color: Colors.transparent,
+  //     child: InkWell(
+  //       borderRadius: BorderRadius.circular(14),
+  //       onTap: () => _showSnack('Simulating incoming call…'),
+  //       child: DashedBorderContainer(
+  //         borderRadius: 14,
+  //         child: Container(
+  //           width: double.infinity,
+  //           padding: const EdgeInsets.symmetric(vertical: 14),
+  //           child: const Row(
+  //             mainAxisAlignment: MainAxisAlignment.center,
+  //             children: [
+  //               Icon(Icons.phone_callback_outlined, size: 18, color: AppColors.primary),
+  //               SizedBox(width: 8),
+  //               Text(
+  //                 'Simulate Incoming Call (demo)',
+  //                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 }

@@ -41,8 +41,8 @@ class CustomShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: baseColor ?? const Color(0xFFE2E8F0),
-      highlightColor: highlightColor ?? const Color(0xFFF1F5F9),
+      baseColor: baseColor ?? AppColors.fieldBorderColor,
+      highlightColor: highlightColor ?? AppColors.statCardBorder,
       child: Container(
         width: width,
         height: height,
@@ -67,7 +67,7 @@ class ActivityListItemShimmer extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        border: Border.all(color: AppColors.statCardBorder),
       ),
       child: Row(
         children: [
