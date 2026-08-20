@@ -25,20 +25,20 @@ class ProfilePage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
-      appBar: AppBar(
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        titleSpacing: 24,
-        title: const Text(
-          'More',
-          style: TextStyle(
-            color: AppColors.darkText,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
+      // appBar: AppBar(
+      //   backgroundColor: AppColors.white,
+      //   elevation: 0,
+      //   scrolledUnderElevation: 0,
+      //   titleSpacing: 24,
+      //   title: const Text(
+      //     'Profile',
+      //     style: TextStyle(
+      //       color: AppColors.darkText,
+      //       fontSize: 24,
+      //       fontWeight: FontWeight.bold,
+      //     ),
+      //   ),
+      // ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),

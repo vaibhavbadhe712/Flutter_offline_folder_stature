@@ -273,6 +273,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
           labels: const ['Single Call', 'Bulk Calls'],
           selectedIndex: _isBulkMode ? 1 : 0,
           onChanged: (index) => setState(() => _isBulkMode = index == 1),
+          selectedColor: AppColors.primary,
         ),
         const SizedBox(height: 24),
         if (_isBulkMode) ...[
@@ -545,7 +546,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
     );
     final label = isLoading ? 'Starting Call...' : 'Start AI Test Call';
     final icon = Icons.play_arrow_outlined;
-    final bgColor = const Color(0xFF0F172A);
+    const bgColor = AppColors.primary;
 
     return SizedBox(
       width: double.infinity,
@@ -991,7 +992,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? const Color(0xFF0F172A)
+                      ? AppColors.primary
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -1030,12 +1031,12 @@ class _CallsPageState extends ConsumerState<CallsPage> {
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? const Color(0xFF0F172A)
+                      ? AppColors.primary
                       : const Color(0xFFF8FAFC),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: isSelected
-                        ? const Color(0xFF0F172A)
+                        ? AppColors.primary
                         : const Color(0xFFE2E8F0),
                   ),
                 ),
@@ -1091,7 +1092,10 @@ class _CallsPageState extends ConsumerState<CallsPage> {
               Switch(
                 value: _callingHoursEnabled,
                 onChanged: (val) => setState(() => _callingHoursEnabled = val),
-                activeColor: const Color(0xFF0F172A),
+                activeColor: AppColors.primary,
+                activeTrackColor: AppColors.primary.withValues(alpha: 0.35),
+                inactiveThumbColor: AppColors.white,
+                inactiveTrackColor: AppColors.primaryLight,
               ),
             ],
           ),
@@ -1120,7 +1124,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
         : Icons.play_arrow_outlined;
     final buttonBg = isNameEmpty
         ? const Color(0xFF94A3B8)
-        : const Color(0xFF0F172A);
+        : AppColors.primary;
 
     return SizedBox(
       width: double.infinity,
