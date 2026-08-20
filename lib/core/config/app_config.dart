@@ -8,7 +8,7 @@ class AppConfig {
   String get environmentName => dotenv.get('ENV_NAME', fallback: 'DEVELOPMENT');
 
   /// Base API Endpoint url.
-  String get baseUrl => dotenv.get('API_BASE_URL', fallback: 'https://api.example.com/v1');
+  String get baseUrl => dotenv.get('API_BASE_URL', fallback: 'https://calling-agent-dev.duckdns.org');
 
   /// Timeout configuration duration for network connections.
   Duration get timeoutDuration {

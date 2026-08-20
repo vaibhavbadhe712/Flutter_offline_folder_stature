@@ -94,9 +94,9 @@ class ShellScaffold extends StatelessWidget {
               label: 'Wallet',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.menu),
-              activeIcon: Icon(Icons.menu),
-              label: 'More',
+              icon: Icon(Icons.person_outline),
+              activeIcon: Icon(Icons.person),
+              label: 'Profile',
             ),
           ],
         ),
