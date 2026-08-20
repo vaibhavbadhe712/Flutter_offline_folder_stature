@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../widgets/activity_list_item.dart';
 import '../../../widgets/custom_shimmer.dart';
@@ -35,13 +36,28 @@ class DashboardPage extends ConsumerWidget {
             width: 1,
           ),
         ),
-        title: const Text(
-          'Dashboard',
-          style: TextStyle(
-            color: AppColors.darkSlate,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              _getGreeting(),
+              style: const TextStyle(
+                color: AppColors.greyText,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              userName,
+              style: const TextStyle(
+                color: AppColors.darkSlate,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
         actions: [
           IconButton(
@@ -69,6 +85,7 @@ class DashboardPage extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              /*
               // User Greeting & Wallet Row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -127,6 +144,7 @@ class DashboardPage extends ConsumerWidget {
                   ),
                 ],
               ),
+              */
               const SizedBox(height: 20),
 
               // Timeframe Segmented Selector
@@ -257,7 +275,7 @@ class DashboardPage extends ConsumerWidget {
                     ),
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () => context.go('/dialer'),
                     child: const Text(
                       'View all',
                       style: TextStyle(
