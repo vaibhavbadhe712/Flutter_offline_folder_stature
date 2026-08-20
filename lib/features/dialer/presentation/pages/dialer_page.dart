@@ -21,6 +21,7 @@ class DialerPage extends ConsumerStatefulWidget {
 class _DialerPageState extends ConsumerState<DialerPage> {
   bool _isContactsMode = false;
   String _dialedNumber = '';
+  String? _selectedKey;
 
   void _showSnack(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
@@ -50,6 +51,7 @@ class _DialerPageState extends ConsumerState<DialerPage> {
               SegmentedToggle(
                 labels: const ['Dialer Pad', 'Contacts'],
                 selectedIndex: _isContactsMode ? 1 : 0,
+                selectedColor: AppColors.primary,
                 onChanged: (index) {
                   setState(() => _isContactsMode = index == 1);
                   if (index == 1) {
@@ -129,15 +131,31 @@ class _DialerPageState extends ConsumerState<DialerPage> {
   }
 
   Widget _buildKeypadKey(String key) {
+    final isSelected = _selectedKey == key;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () => setState(() => _dialedNumber += key),
-        child: Center(
-          child: Text(
-            key,
-            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w600, color: AppColors.black),
+        onTap: () => setState(() {
+          _dialedNumber += key;
+          _selectedKey = key;
+        }),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          margin: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: Text(
+              key,
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? Colors.white : AppColors.black,
+              ),
+            ),
           ),
         ),
       ),

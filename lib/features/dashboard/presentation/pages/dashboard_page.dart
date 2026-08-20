@@ -267,7 +267,7 @@ class DashboardPage extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'Recent Activity',
+                    'Recent calls',
                     style: TextStyle(
                       color: AppColors.darkSlate,
                       fontSize: 18,
