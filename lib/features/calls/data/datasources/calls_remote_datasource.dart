@@ -50,7 +50,10 @@ class CallsRemoteDataSourceImpl implements CallsRemoteDataSource {
   }) async {
     final path = '/api/phone-numbers/client/$clientId/user/$userId';
     
-    final response = await _dioClient.get(path);
+    final response = await _dioClient.get(
+      path,
+      options: Options(headers: {'x-client-id': clientId, 'x-user-id': userId}),
+    );
     
     final list = response.data as List<dynamic>;
     return list.map((json) => PhoneNumberModel.fromJson(json as Map<String, dynamic>)).toList();
@@ -76,7 +79,10 @@ class CallsRemoteDataSourceImpl implements CallsRemoteDataSource {
   }) async {
     final path = '/api/contacts/client/$clientId/user/$userId';
     
-    final response = await _dioClient.get(path);
+    final response = await _dioClient.get(
+      path,
+      options: Options(headers: {'x-client-id': clientId, 'x-user-id': userId}),
+    );
     
     final responseData = response.data as Map<String, dynamic>;
     final list = responseData['contacts'] as List<dynamic>;
