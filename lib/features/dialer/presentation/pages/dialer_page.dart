@@ -84,14 +84,14 @@ class _DialerPageState extends ConsumerState<DialerPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Dialer',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.black,
-                ),
-              ),
+              // const Text(
+              //   'Dialer',
+              //   style: TextStyle(
+              //     fontSize: 22,
+              //     fontWeight: FontWeight.bold,
+              //     color: AppColors.black,
+              //   ),
+              // ),
               const SizedBox(height: 16),
               SegmentedToggle(
                 labels: const ['Dialer Pad', 'Contacts'],
