@@ -27,13 +27,23 @@ class CallsRepositoryImpl implements CallsRepository {
       final entities = models.map((model) => model.toEntity()).toList();
       return Right(entities);
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message, statusCode: e.statusCode, errorData: e.errorData));
+      return Left(
+        ServerFailure(
+          message: e.message,
+          statusCode: e.statusCode,
+          errorData: e.errorData,
+        ),
+      );
     } on NetworkException catch (e) {
       return Left(NetworkFailure(e.message));
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message));
     } catch (e) {
-      return Left(UnexpectedFailure('An error occurred during loading outbound phone numbers: $e'));
+      return Left(
+        UnexpectedFailure(
+          'An error occurred during loading outbound phone numbers: $e',
+        ),
+      );
     }
   }
 
@@ -50,13 +60,21 @@ class CallsRepositoryImpl implements CallsRepository {
       final entities = models.map((model) => model.toEntity()).toList();
       return Right(entities);
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message, statusCode: e.statusCode, errorData: e.errorData));
+      return Left(
+        ServerFailure(
+          message: e.message,
+          statusCode: e.statusCode,
+          errorData: e.errorData,
+        ),
+      );
     } on NetworkException catch (e) {
       return Left(NetworkFailure(e.message));
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message));
     } catch (e) {
-      return Left(UnexpectedFailure('An error occurred during loading assistants: $e'));
+      return Left(
+        UnexpectedFailure('An error occurred during loading assistants: $e'),
+      );
     }
   }
 
@@ -73,13 +91,21 @@ class CallsRepositoryImpl implements CallsRepository {
       final entities = models.map((model) => model.toEntity()).toList();
       return Right(entities);
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message, statusCode: e.statusCode, errorData: e.errorData));
+      return Left(
+        ServerFailure(
+          message: e.message,
+          statusCode: e.statusCode,
+          errorData: e.errorData,
+        ),
+      );
     } on NetworkException catch (e) {
       return Left(NetworkFailure(e.message));
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message));
     } catch (e) {
-      return Left(UnexpectedFailure('An error occurred during loading contacts: $e'));
+      return Left(
+        UnexpectedFailure('An error occurred during loading contacts: $e'),
+      );
     }
   }
 
@@ -103,13 +129,55 @@ class CallsRepositoryImpl implements CallsRepository {
       );
       return Right(message);
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message, statusCode: e.statusCode, errorData: e.errorData));
+      return Left(
+        ServerFailure(
+          message: e.message,
+          statusCode: e.statusCode,
+          errorData: e.errorData,
+        ),
+      );
     } on NetworkException catch (e) {
       return Left(NetworkFailure(e.message));
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message));
     } catch (e) {
-      return Left(UnexpectedFailure('An error occurred during starting test call: $e'));
+      return Left(
+        UnexpectedFailure('An error occurred during starting test call: $e'),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> dialOutbound({
+    required String clientId,
+    required String userId,
+    required String toNumber,
+    required String provider,
+  }) async {
+    try {
+      final status = await _remoteDataSource.dialOutbound(
+        clientId: clientId,
+        userId: userId,
+        toNumber: toNumber,
+        provider: provider,
+      );
+      return Right(status);
+    } on ServerException catch (e) {
+      return Left(
+        ServerFailure(
+          message: e.message,
+          statusCode: e.statusCode,
+          errorData: e.errorData,
+        ),
+      );
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } catch (e) {
+      return Left(
+        UnexpectedFailure('An error occurred while placing the call: $e'),
+      );
     }
   }
 }

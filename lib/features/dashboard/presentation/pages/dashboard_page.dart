@@ -6,7 +6,7 @@ import '../../../widgets/activity_list_item.dart';
 import '../../../widgets/custom_shimmer.dart';
 import '../../../../core/utils/constants/app_colors.dart';
 import '../providers/dashboard_metrics_provider.dart';
-import '../providers/recent_activity_provider.dart';
+import '../../../dialer/presentation/providers/dialer_calls_provider.dart';
 
 
 
@@ -76,7 +76,8 @@ class DashboardPage extends ConsumerWidget {
           );
           await Future.wait([
             ref.read(dashboardMetricsProvider.notifier).fetchMetrics(userId: userId),
-            ref.read(recentActivityProvider.notifier).fetchRecentActivity(userId: userId),
+            if (userId != null)
+              ref.read(dialerCallsProvider.notifier).fetchCalls(userId: userId),
           ]);
         },
         child: SingleChildScrollView(
@@ -288,21 +289,17 @@ class DashboardPage extends ConsumerWidget {
               ),
               const SizedBox(height: 4),
 
-              // List of Activities
-              ref.watch(recentActivityProvider).when(
-                initial: () => Column(
-                  children: List.generate(3, (index) => const ActivityListItemShimmer()),
-                ),
+               ref.watch(dialerCallsProvider).when(
                 loading: () => Column(
                   children: List.generate(3, (index) => const ActivityListItemShimmer()),
                 ),
-                error: (message) => Center(
+                error: (error, _) => Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 24.0),
                     child: Column(
                       children: [
                         Text(
-                          'Error: $message',
+                          'Error: $error',
                           style: const TextStyle(color: AppColors.noticeRedText, fontSize: 12),
                           textAlign: TextAlign.center,
                         ),
@@ -313,9 +310,9 @@ class DashboardPage extends ConsumerWidget {
                               authenticated: (user) => user.id,
                               orElse: () => null,
                             );
-                            ref
-                                .read(recentActivityProvider.notifier)
-                                .fetchRecentActivity(userId: userId);
+                            if (userId != null) {
+                              ref.read(dialerCallsProvider.notifier).fetchCalls(userId: userId);
+                            }
                           },
                           child: const Text('Retry', style: TextStyle(fontSize: 12, color: AppColors.statCardCallsIcon)),
                         ),
@@ -323,8 +320,8 @@ class DashboardPage extends ConsumerWidget {
                     ),
                   ),
                 ),
-                loaded: (activities) {
-                  if (activities.isEmpty) {
+                data: (calls) {
+                  if (calls.isEmpty) {
                     return Center(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 24.0),
@@ -344,7 +341,7 @@ class DashboardPage extends ConsumerWidget {
                             ),
                             const SizedBox(height: 16),
                             const Text(
-                              'No Recent Activity Found',
+                              'No Recent Calls Found',
                               style: TextStyle(
                                 color: AppColors.black,
                                 fontSize: 15,
@@ -360,17 +357,18 @@ class DashboardPage extends ConsumerWidget {
                   return ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: activities.length,
+                    itemCount: calls.length,
                     itemBuilder: (context, index) {
-                      final activity = activities[index];
-                      final initials = _getInitials(activity.contactInfo);
-                      final avatarColor = _getAvatarColorsForName(activity.contactInfo);
-                      final dateTimeFormatted = _formatActivityDateTime(activity.dateTime);
-                      final typeString = activity.assistantName.toUpperCase();
-                      final subtitle = '$dateTimeFormatted · $typeString';
-                      final amount = _formatSpend(activity.costLocal, activity.currency);
+                      final call = calls[index];
+                      final number = call.toNumber.isEmpty ? 'Unknown number' : call.toNumber;
+                      final initials = _getInitials(number);
+                      final avatarColor = _getAvatarColorsForName(number);
+                      final dateTimeFormatted = _formatActivityDateTime(call.startedAt);
+                      final direction = call.direction.isEmpty ? 'CALL' : call.direction.toUpperCase();
+                      final subtitle = '$dateTimeFormatted · $direction';
+                      final amount = _formatDuration(call.durationSeconds);
                       
-                      final status = activity.status;
+                      final status = call.status;
                       final Color statusTextColor;
                       final Color statusBgColor;
                       
@@ -389,7 +387,7 @@ class DashboardPage extends ConsumerWidget {
                         initials: initials,
                         avatarBgColor: avatarColor.bg,
                         avatarTextColor: avatarColor.text,
-                        name: activity.contactInfo,
+                        name: number,
                         subtitle: subtitle,
                         amount: amount,
                         status: status,
@@ -434,6 +432,12 @@ class DashboardPage extends ConsumerWidget {
       default:
         return '\$${amount.toStringAsFixed(2)}';
     }
+  }
+
+  String _formatDuration(int durationSeconds) {
+    final minutes = durationSeconds ~/ 60;
+    final seconds = (durationSeconds % 60).toString().padLeft(2, '0');
+    return '${minutes}m ${seconds}s';
   }
 
   Widget _buildStatCard({

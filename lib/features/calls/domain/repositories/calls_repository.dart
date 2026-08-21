@@ -28,4 +28,11 @@ abstract class CallsRepository {
     required String phoneNumberId,
     required String contactId,
   });
+
+  Future<Either<Failure, String>> dialOutbound({
+    required String clientId,
+    required String userId,
+    required String toNumber,
+    required String provider,
+  });
 }

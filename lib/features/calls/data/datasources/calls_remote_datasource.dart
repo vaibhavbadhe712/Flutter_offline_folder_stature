@@ -1,4 +1,5 @@
 import '../../../../core/network/dio_client.dart';
+import 'package:dio/dio.dart';
 import '../models/phone_number_model.dart';
 import '../models/assistant_model.dart';
 import '../models/contact_model.dart';
@@ -28,6 +29,14 @@ abstract class CallsRemoteDataSource {
     required String phoneNumberId,
     required String contactId,
   });
+
+  /// Starts a direct outbound call from the dialer.
+  Future<String> dialOutbound({
+    required String clientId,
+    required String userId,
+    required String toNumber,
+    required String provider,
+  });
 }
 
 @LazySingleton(as: CallsRemoteDataSource)
@@ -42,11 +51,13 @@ class CallsRemoteDataSourceImpl implements CallsRemoteDataSource {
     required String userId,
   }) async {
     final path = '/api/phone-numbers/client/$clientId/user/$userId';
-    
+
     final response = await _dioClient.get(path);
-    
+
     final list = response.data as List<dynamic>;
-    return list.map((json) => PhoneNumberModel.fromJson(json as Map<String, dynamic>)).toList();
+    return list
+        .map((json) => PhoneNumberModel.fromJson(json as Map<String, dynamic>))
+        .toList();
   }
 
   @override
@@ -55,11 +66,13 @@ class CallsRemoteDataSourceImpl implements CallsRemoteDataSource {
     required String userId,
   }) async {
     final path = '/api/assistants/client/$clientId/user/$userId';
-    
+
     final response = await _dioClient.get(path);
-    
+
     final list = response.data as List<dynamic>;
-    return list.map((json) => AssistantModel.fromJson(json as Map<String, dynamic>)).toList();
+    return list
+        .map((json) => AssistantModel.fromJson(json as Map<String, dynamic>))
+        .toList();
   }
 
   @override
@@ -68,12 +81,14 @@ class CallsRemoteDataSourceImpl implements CallsRemoteDataSource {
     required String userId,
   }) async {
     final path = '/api/contacts/client/$clientId/user/$userId';
-    
+
     final response = await _dioClient.get(path);
-    
+
     final responseData = response.data as Map<String, dynamic>;
     final list = responseData['contacts'] as List<dynamic>;
-    return list.map((json) => ContactModel.fromJson(json as Map<String, dynamic>)).toList();
+    return list
+        .map((json) => ContactModel.fromJson(json as Map<String, dynamic>))
+        .toList();
   }
 
   @override
@@ -86,7 +101,7 @@ class CallsRemoteDataSourceImpl implements CallsRemoteDataSource {
     required String contactId,
   }) async {
     final path = '/api/calls/client/$clientId/user/$userId/start';
-    
+
     final response = await _dioClient.post(
       path,
       data: {
@@ -98,5 +113,22 @@ class CallsRemoteDataSourceImpl implements CallsRemoteDataSource {
     );
     final responseData = response.data as Map<String, dynamic>;
     return responseData['message'] as String;
+  }
+
+  @override
+  Future<String> dialOutbound({
+    required String clientId,
+    required String userId,
+    required String toNumber,
+    required String provider,
+  }) async {
+    final response = await _dioClient.post<Map<String, dynamic>>(
+      '/api/dialer/client/$clientId/user/$userId/outbound',
+      data: {'to_number': toNumber, 'provider': provider},
+      options: Options(headers: {'x-client-id': clientId, 'x-user-id': userId}),
+    );
+
+    final responseData = response.data;
+    return responseData?['status'] as String? ?? 'dialing';
   }
 }
