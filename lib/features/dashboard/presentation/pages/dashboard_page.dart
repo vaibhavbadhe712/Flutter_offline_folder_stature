@@ -6,7 +6,11 @@ import '../../../widgets/activity_list_item.dart';
 import '../../../widgets/custom_shimmer.dart';
 import '../../../../core/utils/constants/app_colors.dart';
 import '../providers/dashboard_metrics_provider.dart';
-import '../../../dialer/presentation/providers/dialer_calls_provider.dart';
+import '../providers/recent_activity_provider.dart';
+import '../providers/minutes_left_holder.dart';
+import '../providers/web_dialer_calls_provider.dart';
+import '../../data/models/web_dialer_call_model.dart';
+import '../../domain/entities/recent_activity_entity.dart';
 
 
 
@@ -60,11 +64,45 @@ class DashboardPage extends ConsumerWidget {
           ],
         ),
         actions: [
+          /*
           IconButton(
             icon: const Icon(Icons.notifications_none_outlined, color: AppColors.greyTextColor, size: 26),
             onPressed: () {},
           ),
-          const SizedBox(width: 8),
+          */
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: AppColors.fieldBorderColor),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.black.withValues(alpha: 0.02),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.account_balance_wallet_outlined, color: AppColors.statCardCallsIcon, size: 20),
+                  SizedBox(width: 6),
+                  Text(
+                    '₹4,230.5',
+                    style: TextStyle(
+                      color: AppColors.statCardValue,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
         ],
       ),
       body: RefreshIndicator(
@@ -76,8 +114,7 @@ class DashboardPage extends ConsumerWidget {
           );
           await Future.wait([
             ref.read(dashboardMetricsProvider.notifier).fetchMetrics(userId: userId),
-            if (userId != null)
-            ref.read(dialerCallsProvider.notifier).fetchCalls(userId: userId),
+            ref.read(recentActivityProvider.notifier).fetchRecentActivity(userId: userId),
           ]);
         },
         child: SingleChildScrollView(
@@ -249,12 +286,21 @@ class DashboardPage extends ConsumerWidget {
                           title: 'Total Minutes',
                           value: '${metrics.totalMinutes.toInt()}',
                         ),
+                        /*
                         _buildStatCard(
                           icon: _getCurrencyIcon(metrics.currency),
                           iconColor: AppColors.statCardSpendIcon,
                           iconBgColor: AppColors.statCardSpendBg,
                           title: 'Total Spend',
                           value: formattedSpend,
+                        ),
+                        */
+                        _buildStatCard(
+                          icon: Icons.hourglass_bottom_outlined,
+                          iconColor: AppColors.statCardSpendIcon,
+                          iconBgColor: AppColors.statCardSpendBg,
+                          title: 'Minutes Left',
+                          value: '${MinutesLeftHolder.minutesLeft.toInt()}',
                         ),
                       ],
                     );
@@ -263,7 +309,7 @@ class DashboardPage extends ConsumerWidget {
               ),
               const SizedBox(height: 24),
 
-              // Recent Activity Section
+              // Recent calls Section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -276,9 +322,9 @@ class DashboardPage extends ConsumerWidget {
                     ),
                   ),
                   TextButton(
-                    onPressed: () => context.go('/dialer'),
+                    onPressed: () => context.go('/calls'),
                     child: const Text(
-                      'View all',
+                      'View all >',
                       style: TextStyle(
                         color: AppColors.statCardCallsIcon,
                         fontWeight: FontWeight.w600,
@@ -289,17 +335,21 @@ class DashboardPage extends ConsumerWidget {
               ),
               const SizedBox(height: 4),
 
-               ref.watch(dialerCallsProvider).when(
-                loading: () => Column(
-                  children: List.generate(3, (index) => const ActivityListItemShimmer()),
+              // List of Activities
+              ref.watch(recentActivityProvider).when(
+                initial: () => Column(
+                  children: List.generate(5, (index) => const ActivityListItemShimmer()),
                 ),
-                error: (error, _) => Center(
+                loading: () => Column(
+                  children: List.generate(5, (index) => const ActivityListItemShimmer()),
+                ),
+                error: (message) => Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 24.0),
                     child: Column(
                       children: [
                         Text(
-                          'Error: $error',
+                          'Error: $message',
                           style: const TextStyle(color: AppColors.noticeRedText, fontSize: 12),
                           textAlign: TextAlign.center,
                         ),
@@ -310,9 +360,9 @@ class DashboardPage extends ConsumerWidget {
                               authenticated: (user) => user.id,
                               orElse: () => null,
                             );
-                            if (userId != null) {
-                              ref.read(dialerCallsProvider.notifier).fetchCalls(userId: userId);
-                            }
+                            ref
+                                .read(recentActivityProvider.notifier)
+                                .fetchRecentActivity(userId: userId);
                           },
                           child: const Text('Retry', style: TextStyle(fontSize: 12, color: AppColors.statCardCallsIcon)),
                         ),
@@ -320,8 +370,8 @@ class DashboardPage extends ConsumerWidget {
                     ),
                   ),
                 ),
-                data: (calls) {
-                  if (calls.isEmpty) {
+                loaded: (activities) {
+                  if (activities.isEmpty) {
                     return Center(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 24.0),
@@ -341,7 +391,7 @@ class DashboardPage extends ConsumerWidget {
                             ),
                             const SizedBox(height: 16),
                             const Text(
-                              'No Recent Calls Found',
+                              'No Recent Activity Found',
                               style: TextStyle(
                                 color: AppColors.black,
                                 fontSize: 15,
@@ -354,49 +404,81 @@ class DashboardPage extends ConsumerWidget {
                       ),
                     );
                   }
+                  final limitCount = activities.length > 5 ? 5 : activities.length;
                   return ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: calls.length,
+                    itemCount: limitCount,
                     itemBuilder: (context, index) {
-                      final call = calls[index];
-                      final number = call.toNumber.isEmpty ? 'Unknown number' : call.toNumber;
-                      final initials = _getInitials(number);
-                      final avatarColor = _getAvatarColorsForName(number);
-                      final dateTimeFormatted = _formatActivityDateTime(call.startedAt);
-                      final direction = call.direction.isEmpty ? 'CALL' : call.direction.toUpperCase();
-                      final subtitle = '$dateTimeFormatted · $direction';
-                      final amount = _formatDuration(call.durationSeconds);
-                      
-                      final status = call.status;
-                      final Color statusTextColor;
-                      final Color statusBgColor;
-                      
-                      if (status.toLowerCase() == 'completed' || status.toLowerCase() == 'success' || status.toLowerCase() == 'positive') {
-                        statusTextColor = AppColors.statusPositiveText;
-                        statusBgColor = AppColors.mintGreen;
-                      } else if (status.toLowerCase() == 'failed' || status.toLowerCase() == 'cancelled' || status.toLowerCase() == 'negative') {
-                        statusTextColor = AppColors.statusNegativeText;
-                        statusBgColor = AppColors.noticeRedBg;
-                      } else {
-                        statusTextColor = AppColors.statCardAgentsIcon;
-                        statusBgColor = AppColors.statCardAgentsBg;
-                      }
-                      
-                      return ActivityListItem(
-                        initials: initials,
-                        avatarBgColor: avatarColor.bg,
-                        avatarTextColor: avatarColor.text,
-                        name: number,
-                        subtitle: subtitle,
-                        amount: amount,
-                        status: status,
-                        statusTextColor: statusTextColor,
-                        statusBgColor: statusBgColor,
-                      );
+                      return RecentCallItem(activity: activities[index]);
                     },
                   );
                 },
+              ),
+              const SizedBox(height: 20),
+
+              // Web dialer calls Section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Web dialer calls',
+                    style: TextStyle(
+                      color: AppColors.darkSlate,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => context.go('/dialer'),
+                    child: const Text(
+                      'View all >',
+                      style: TextStyle(
+                        color: AppColors.statCardCallsIcon,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+
+              // List of Web Dialer Calls
+              ref.watch(webDialerCallsProvider).when(
+                data: (calls) {
+                  if (calls.isEmpty) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24.0),
+                        child: Text(
+                          'No Web Dialer Calls Found',
+                          style: TextStyle(color: AppColors.greyText, fontSize: 13),
+                        ),
+                      ),
+                    );
+                  }
+                  final limitCount = calls.length > 5 ? 5 : calls.length;
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: limitCount,
+                    itemBuilder: (context, index) {
+                      return WebDialerCallItem(call: calls[index]);
+                    },
+                  );
+                },
+                loading: () => Column(
+                  children: List.generate(5, (index) => const ActivityListItemShimmer()),
+                ),
+                error: (error, stack) => Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: Text(
+                      'Error loading calls: $error',
+                      style: const TextStyle(color: AppColors.errorRed, fontSize: 12),
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(height: 20),
             ],
@@ -432,12 +514,6 @@ class DashboardPage extends ConsumerWidget {
       default:
         return '\$${amount.toStringAsFixed(2)}';
     }
-  }
-
-  String _formatDuration(int durationSeconds) {
-    final minutes = durationSeconds ~/ 60;
-    final seconds = (durationSeconds % 60).toString().padLeft(2, '0');
-    return '${minutes}m ${seconds}s';
   }
 
   Widget _buildStatCard({
@@ -624,3 +700,299 @@ const List<_AvatarColor> _avatarColors = [
   _AvatarColor(AppColors.avatarVioletBg, AppColors.avatarVioletText),
   _AvatarColor(AppColors.noticeRedBg, AppColors.noticeRedText),
 ];
+
+class WebDialerCallItem extends StatelessWidget {
+  final WebDialerCall call;
+
+  const WebDialerCallItem({super.key, required this.call});
+
+  String _formatDuration(int seconds) {
+    final minutes = seconds ~/ 60;
+    final remainingSeconds = seconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
+  }
+
+  String _formatDateTime(String dateTimeStr) {
+    try {
+      final dt = DateTime.parse(dateTimeStr).toLocal();
+      final now = DateTime.now();
+      final hour = dt.hour == 0 ? 12 : (dt.hour > 12 ? dt.hour - 12 : dt.hour);
+      final period = dt.hour >= 12 ? 'PM' : 'AM';
+      final minute = dt.minute.toString().padLeft(2, '0');
+      final timeStr = '${hour.toString().padLeft(2, '0')}:$minute $period';
+      
+      final isToday = dt.year == now.year && dt.month == now.month && dt.day == now.day;
+      if (isToday) {
+        return timeStr;
+      } else {
+        final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return '${months[dt.month - 1]} ${dt.day}, $timeStr';
+      }
+    } catch (_) {
+      return dateTimeStr;
+    }
+  }
+
+  String _getInitials(String contactInfo) {
+    final cleanName = contactInfo.replaceAll(RegExp(r'\s*\+?\d+\s*'), '').replaceAll(RegExp(r'[^\w\s]'), '').trim();
+    if (cleanName.isEmpty) return '??';
+    final parts = cleanName.split(RegExp(r'\s+'));
+    if (parts.length > 1) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return parts[0].substring(0, parts[0].length >= 2 ? 2 : 1).toUpperCase();
+  }
+
+  _AvatarColor _getAvatarColor(String number) {
+    if (number.isEmpty) return _avatarColors[0];
+    final index = number.hashCode.abs() % _avatarColors.length;
+    return _avatarColors[index];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final status = call.status;
+    final lowerStatus = status.toLowerCase();
+    final Color statusTextColor;
+    final Color statusBgColor;
+    
+    if (lowerStatus == 'completed' || lowerStatus == 'success' || lowerStatus == 'answered') {
+      statusTextColor = AppColors.statusPositiveText;
+      statusBgColor = AppColors.mintGreen;
+    } else if (lowerStatus == 'no_answer' || lowerStatus == 'busy' || lowerStatus == 'no-conversation' || lowerStatus == 'no_conversation') {
+      statusTextColor = AppColors.noticeYellowText;
+      statusBgColor = AppColors.noticeYellowBg;
+    } else if (lowerStatus == 'failed' || lowerStatus == 'cancelled') {
+      statusTextColor = AppColors.statusNegativeText;
+      statusBgColor = AppColors.noticeRedBg;
+    } else {
+      statusTextColor = AppColors.statCardAgentsIcon;
+      statusBgColor = AppColors.statCardAgentsBg;
+    }
+
+    final formattedTime = _formatDateTime(call.createdAt);
+    final durationStr = _formatDuration(call.duration);
+    final initials = _getInitials(call.toNumber);
+    final avatarColor = _getAvatarColor(call.toNumber);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.statCardBorder),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 20,
+            backgroundColor: avatarColor.bg,
+            child: Icon(
+              Icons.call_made_rounded,
+              color: avatarColor.text,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      call.toNumber,
+                      style: const TextStyle(
+                        color: AppColors.black,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: statusBgColor,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        call.status,
+                        style: TextStyle(
+                          color: statusTextColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Text(
+                      call.direction.toLowerCase() == 'outbound' ? 'Outbound' : 'Inbound',
+                      style: const TextStyle(
+                        color: AppColors.greyText,
+                        fontSize: 11,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Icon(Icons.access_time_outlined, size: 12, color: AppColors.greyText),
+                    const SizedBox(width: 4),
+                    Text(
+                      durationStr,
+                      style: const TextStyle(
+                        color: AppColors.greyText,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class RecentCallItem extends StatelessWidget {
+  final RecentActivityEntity activity;
+
+  const RecentCallItem({super.key, required this.activity});
+
+  String _getInitials(String contactInfo) {
+    final cleanName = contactInfo.replaceAll(RegExp(r'\s*\+?\d+\s*'), '').replaceAll(RegExp(r'[^\w\s]'), '').trim();
+    if (cleanName.isEmpty) return '??';
+    final parts = cleanName.split(RegExp(r'\s+'));
+    if (parts.length > 1) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return parts[0].substring(0, parts[0].length >= 2 ? 2 : 1).toUpperCase();
+  }
+
+  _AvatarColor _getAvatarColorsForName(String name) {
+    if (name.isEmpty) return _avatarColors[0];
+    final index = name.hashCode.abs() % _avatarColors.length;
+    return _avatarColors[index];
+  }
+
+  String _formatActivityDateTime(String dateTimeStr) {
+    try {
+      final dt = DateTime.parse(dateTimeStr).toLocal();
+      final now = DateTime.now();
+      final hour = dt.hour == 0 ? 12 : (dt.hour > 12 ? dt.hour - 12 : dt.hour);
+      final period = dt.hour >= 12 ? 'PM' : 'AM';
+      final minute = dt.minute.toString().padLeft(2, '0');
+      final timeStr = '${hour.toString().padLeft(2, '0')}:$minute $period';
+      
+      final isToday = dt.year == now.year && dt.month == now.month && dt.day == now.day;
+      if (isToday) {
+        return timeStr;
+      } else {
+        final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return '${months[dt.month - 1]} ${dt.day}, $timeStr';
+      }
+    } catch (_) {
+      return '';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final initials = _getInitials(activity.toNumber);
+    final avatarColor = _getAvatarColorsForName(activity.toNumber);
+    final dateTimeFormatted = _formatActivityDateTime(activity.dateTime);
+    final typeString = activity.assistantName.toUpperCase();
+    final subtitle = '$dateTimeFormatted · $typeString';
+    
+    final status = activity.status;
+    final Color statusTextColor;
+    final Color statusBgColor;
+    
+    final lowerStatus = status.toLowerCase();
+    if (lowerStatus == 'completed' || lowerStatus == 'success' || lowerStatus == 'positive') {
+      statusTextColor = AppColors.statusPositiveText;
+      statusBgColor = AppColors.mintGreen;
+    } else if (lowerStatus == 'failed' || lowerStatus == 'cancelled' || lowerStatus == 'negative' || lowerStatus == 'no-conversation' || lowerStatus == 'no_conversation') {
+      statusTextColor = AppColors.noticeYellowText;
+      statusBgColor = AppColors.noticeYellowBg;
+    } else {
+      statusTextColor = AppColors.statCardAgentsIcon;
+      statusBgColor = AppColors.statCardAgentsBg;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.statCardBorder),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 20,
+            backgroundColor: avatarColor.bg,
+            child: Text(
+              initials,
+              style: TextStyle(
+                color: avatarColor.text,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      activity.toNumber,
+                      style: const TextStyle(
+                        color: AppColors.black,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: statusBgColor,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        status,
+                        style: TextStyle(
+                          color: statusTextColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    color: AppColors.greyText,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+

@@ -2,6 +2,7 @@ import '../../../../core/network/dio_client.dart';
 import '../models/dashboard_metrics_model.dart';
 import '../models/recent_activity_model.dart';
 import 'package:injectable/injectable.dart';
+import '../../presentation/providers/minutes_left_holder.dart';
 
 abstract class DashboardRemoteDataSource {
   Future<DashboardMetricsModel> getMetrics({
@@ -38,7 +39,13 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
       },
     );
     
-    return DashboardMetricsModel.fromJson(response.data as Map<String, dynamic>);
+    final data = response.data as Map<String, dynamic>;
+    final minutesLeftVal = data['minutes_left'];
+    if (minutesLeftVal is num) {
+      MinutesLeftHolder.minutesLeft = minutesLeftVal.toDouble();
+    }
+    
+    return DashboardMetricsModel.fromJson(data);
   }
 
   @override
