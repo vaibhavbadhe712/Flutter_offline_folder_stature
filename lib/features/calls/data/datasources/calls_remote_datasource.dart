@@ -29,8 +29,6 @@ abstract class CallsRemoteDataSource {
     required String phoneNumberId,
     required String contactId,
   });
-
-  /// Starts a direct outbound call from the dialer.
   Future<String> dialOutbound({
     required String clientId,
     required String userId,
@@ -51,13 +49,11 @@ class CallsRemoteDataSourceImpl implements CallsRemoteDataSource {
     required String userId,
   }) async {
     final path = '/api/phone-numbers/client/$clientId/user/$userId';
-
+    
     final response = await _dioClient.get(path);
-
+    
     final list = response.data as List<dynamic>;
-    return list
-        .map((json) => PhoneNumberModel.fromJson(json as Map<String, dynamic>))
-        .toList();
+    return list.map((json) => PhoneNumberModel.fromJson(json as Map<String, dynamic>)).toList();
   }
 
   @override
@@ -66,13 +62,11 @@ class CallsRemoteDataSourceImpl implements CallsRemoteDataSource {
     required String userId,
   }) async {
     final path = '/api/assistants/client/$clientId/user/$userId';
-
+    
     final response = await _dioClient.get(path);
-
+    
     final list = response.data as List<dynamic>;
-    return list
-        .map((json) => AssistantModel.fromJson(json as Map<String, dynamic>))
-        .toList();
+    return list.map((json) => AssistantModel.fromJson(json as Map<String, dynamic>)).toList();
   }
 
   @override
@@ -81,14 +75,12 @@ class CallsRemoteDataSourceImpl implements CallsRemoteDataSource {
     required String userId,
   }) async {
     final path = '/api/contacts/client/$clientId/user/$userId';
-
+    
     final response = await _dioClient.get(path);
-
+    
     final responseData = response.data as Map<String, dynamic>;
     final list = responseData['contacts'] as List<dynamic>;
-    return list
-        .map((json) => ContactModel.fromJson(json as Map<String, dynamic>))
-        .toList();
+    return list.map((json) => ContactModel.fromJson(json as Map<String, dynamic>)).toList();
   }
 
   @override
@@ -101,7 +93,7 @@ class CallsRemoteDataSourceImpl implements CallsRemoteDataSource {
     required String contactId,
   }) async {
     final path = '/api/calls/client/$clientId/user/$userId/start';
-
+    
     final response = await _dioClient.post(
       path,
       data: {
@@ -114,7 +106,6 @@ class CallsRemoteDataSourceImpl implements CallsRemoteDataSource {
     final responseData = response.data as Map<String, dynamic>;
     return responseData['message'] as String;
   }
-
   @override
   Future<String> dialOutbound({
     required String clientId,

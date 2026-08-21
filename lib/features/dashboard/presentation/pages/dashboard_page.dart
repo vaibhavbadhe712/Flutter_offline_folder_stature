@@ -77,7 +77,7 @@ class DashboardPage extends ConsumerWidget {
           await Future.wait([
             ref.read(dashboardMetricsProvider.notifier).fetchMetrics(userId: userId),
             if (userId != null)
-              ref.read(dialerCallsProvider.notifier).fetchCalls(userId: userId),
+            ref.read(dialerCallsProvider.notifier).fetchCalls(userId: userId),
           ]);
         },
         child: SingleChildScrollView(
