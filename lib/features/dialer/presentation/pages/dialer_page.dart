@@ -9,6 +9,7 @@ import '../providers/dialer_calls_provider.dart';
 import '../widgets/dialer_contacts_view.dart';
 import '../widgets/dialer_keypad.dart';
 import '../widgets/recent_calls_list.dart';
+import '../../../../core/utils/toast_services/toast_services.dart';
 
 class DialerPage extends ConsumerStatefulWidget {
   const DialerPage({super.key});
@@ -32,7 +33,7 @@ class _DialerPageState extends ConsumerState<DialerPage> {
   Future<void> _startOutboundCall(String number) async {
     final normalizedNumber = _normalizePhoneNumber(number);
     if (normalizedNumber == null) {
-      _showSnack('Enter a valid phone number to call.');
+      ToastServices.error('Error', 'Enter a valid phone number to call.');
       return;
     }
 
@@ -40,7 +41,7 @@ class _DialerPageState extends ConsumerState<DialerPage> {
         .read(authProvider)
         .maybeWhen(authenticated: (user) => user.id, orElse: () => null);
     if (userId == null || userId.isEmpty) {
-      _showSnack('Please sign in before placing a call.');
+      ToastServices.error('Error', 'Please sign in before placing a call.');
       return;
     }
 
@@ -48,9 +49,15 @@ class _DialerPageState extends ConsumerState<DialerPage> {
         .read(dialOutboundCallProvider.notifier)
         .dial(userId: userId, toNumber: normalizedNumber);
     if (!mounted) return;
-    _showSnack(error ?? 'Call is dialing $normalizedNumber.');
+
     if (error == null) {
+      ToastServices.success('Success', 'Call initiated successfully.');
+      setState(() {
+        _dialedNumber = '';
+      });
       ref.read(dialerCallsProvider.notifier).fetchCalls(userId: userId);
+    } else {
+      ToastServices.error('Error', error);
     }
   }
 
