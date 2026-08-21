@@ -1,4 +1,5 @@
 import '../../../../core/network/dio_client.dart';
+import 'package:dio/dio.dart';
 import '../models/phone_number_model.dart';
 import '../models/assistant_model.dart';
 import '../models/contact_model.dart';
@@ -27,6 +28,12 @@ abstract class CallsRemoteDataSource {
     required String toNumber,
     required String phoneNumberId,
     required String contactId,
+  });
+  Future<String> dialOutbound({
+    required String clientId,
+    required String userId,
+    required String toNumber,
+    required String provider,
   });
 }
 
@@ -98,5 +105,21 @@ class CallsRemoteDataSourceImpl implements CallsRemoteDataSource {
     );
     final responseData = response.data as Map<String, dynamic>;
     return responseData['message'] as String;
+  }
+  @override
+  Future<String> dialOutbound({
+    required String clientId,
+    required String userId,
+    required String toNumber,
+    required String provider,
+  }) async {
+    final response = await _dioClient.post<Map<String, dynamic>>(
+      '/api/dialer/client/$clientId/user/$userId/outbound',
+      data: {'to_number': toNumber, 'provider': provider},
+      options: Options(headers: {'x-client-id': clientId, 'x-user-id': userId}),
+    );
+
+    final responseData = response.data;
+    return responseData?['status'] as String? ?? 'dialing';
   }
 }
