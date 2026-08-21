@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/constants/app_colors.dart';
@@ -20,6 +22,10 @@ import '../../../widgets/custom_shimmer.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../dashboard/presentation/providers/recent_activity_provider.dart';
 import '../providers/campaign_helpers_provider.dart';
+import '../controllers/calls_screen_controller.dart';
+import '../widgets/calling_hours_card.dart';
+import '../widgets/schedule_selector.dart';
+import '../widgets/target_audience_selector.dart';
 
 class CallsPage extends ConsumerStatefulWidget {
   const CallsPage({super.key});
@@ -29,35 +35,44 @@ class CallsPage extends ConsumerStatefulWidget {
 }
 
 class _CallsPageState extends ConsumerState<CallsPage> {
-  bool _isBulkMode = false;
+  final _ui = CallsUiController();
 
-  PhoneNumberEntity? _selectedOutbound;
+  bool get _isBulkMode => _ui.isBulkMode;
+  set _isBulkMode(bool value) => _ui.isBulkMode = value;
+  bool get _hasSelectedTargetAudience => _ui.hasSelectedTargetAudience;
+  set _hasSelectedTargetAudience(bool value) => _ui.hasSelectedTargetAudience = value;
+  PhoneNumberEntity? get _selectedOutbound => _ui.selectedOutbound;
+  set _selectedOutbound(PhoneNumberEntity? value) => _ui.selectedOutbound = value;
+  String? get _selectedAssistant => _ui.selectedAssistant;
+  set _selectedAssistant(String? value) => _ui.selectedAssistant = value;
+  ContactEntity? get _selectedContact => _ui.selectedContact;
+  set _selectedContact(ContactEntity? value) => _ui.selectedContact = value;
+  TextEditingController get _campaignNameController => _ui.campaignNameController;
+  String get _selectedTargetAudienceMode => _ui.selectedTargetAudienceMode;
+  set _selectedTargetAudienceMode(String value) => _ui.selectedTargetAudienceMode = value;
+  String? get _selectedBulkGroup => _ui.selectedBulkGroup;
+  set _selectedBulkGroup(String? value) => _ui.selectedBulkGroup = value;
+  String? get _selectedCsvFile => _ui.selectedCsvFile;
+  set _selectedCsvFile(String? value) => _ui.selectedCsvFile = value;
+  ContactEntity? get _selectedBulkContact => _ui.selectedBulkContact;
+  set _selectedBulkContact(ContactEntity? value) => _ui.selectedBulkContact = value;
+  String get _selectedScheduleMode => _ui.selectedScheduleMode;
+  set _selectedScheduleMode(String value) => _ui.selectedScheduleMode = value;
+  DateTime? get _scheduledDateTime => _ui.scheduledDateTime;
+  set _scheduledDateTime(DateTime? value) => _ui.scheduledDateTime = value;
+  bool get _callingHoursEnabled => _ui.callingHoursEnabled;
+  set _callingHoursEnabled(bool value) => _ui.callingHoursEnabled = value;
+  bool get _isGroupDropdownExpanded => _ui.isGroupDropdownExpanded;
+  set _isGroupDropdownExpanded(bool value) => _ui.isGroupDropdownExpanded = value;
+  String get _groupSearchQuery => _ui.groupSearchQuery;
+  set _groupSearchQuery(String value) => _ui.groupSearchQuery = value;
+  TextEditingController get _groupSearchController => _ui.groupSearchController;
 
-  String? _selectedAssistant;
-  ContactEntity? _selectedContact;
-
-  final _phoneController = TextEditingController();
-
-  // Bulk Campaign State Variables
-  final _campaignNameController = TextEditingController();
-  String _selectedTargetAudienceMode = 'ALL CONTACTS';
-  String? _selectedBulkGroup;
-  String? _selectedCsvFile;
-  ContactEntity? _selectedBulkContact;
-  String _selectedScheduleMode = 'LAUNCH NOW';
-  DateTime? _scheduledDateTime;
-  bool _callingHoursEnabled = false;
-
-  // Searchable Dropdown State
-  bool _isGroupDropdownExpanded = false;
-  String _groupSearchQuery = '';
-  final _groupSearchController = TextEditingController();
+  void _update(VoidCallback action) => _ui.update(action);
 
   @override
   void dispose() {
-    _phoneController.dispose();
-    _campaignNameController.dispose();
-    _groupSearchController.dispose();
+    _ui.dispose();
     super.dispose();
   }
 
@@ -67,12 +82,55 @@ class _CallsPageState extends ConsumerState<CallsPage> {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  String? get _currentUserId => ref.read(authProvider).maybeWhen(
+        authenticated: (user) => user.id,
+        orElse: () => null,
+      );
+
+  void _selectTargetAudience(String mode) {
+    _update(() {
+      _hasSelectedTargetAudience = true;
+      _selectedTargetAudienceMode = mode;
+      if (mode != 'BY GROUP') {
+        _selectedBulkGroup = null;
+        _isGroupDropdownExpanded = false;
+        _groupSearchQuery = '';
+        _groupSearchController.clear();
+      }
+      if (mode != 'BY FILE') _selectedCsvFile = null;
+      if (mode != 'SINGLE CONTACT') _selectedBulkContact = null;
+    });
+
+    final userId = _currentUserId;
+    if (userId == null || userId.isEmpty) return;
+
+    switch (mode) {
+      case 'ALL CONTACTS':
+      case 'SINGLE CONTACT':
+        ref.read(contactsProvider.notifier).fetchContacts(userId: userId);
+        break;
+      case 'BY GROUP':
+        unawaited(ref.refresh(campaignGroupsProvider(userId).future));
+        break;
+      case 'BY FILE':
+        unawaited(ref.refresh(campaignFilesProvider(userId).future));
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final outboundState = ref.watch(outboundPhoneNumbersProvider);
     final assistantsState = ref.watch(assistantsProvider);
-    final contactsState = ref.watch(contactsProvider);
+    final shouldWatchContacts = !_isBulkMode ||
+      (_hasSelectedTargetAudience &&
+        (_selectedTargetAudienceMode == 'ALL CONTACTS' ||
+          _selectedTargetAudienceMode == 'SINGLE CONTACT'));
+    final contactsState = shouldWatchContacts
+      ? ref.watch(contactsProvider)
+      : const ContactsState.initial();
     final startCallState = ref.watch(startCallProvider);
+    final bulkCampaignState = ref.watch(bulkCampaignProvider);
     final recentActivityState = ref.watch(recentActivityProvider);
 
     ref.listen<StartCallState>(startCallProvider, (previous, next) {
@@ -95,7 +153,23 @@ class _CallsPageState extends ConsumerState<CallsPage> {
       );
     });
 
-    return Scaffold(
+    ref.listen<AsyncValue<String>>(bulkCampaignProvider, (previous, next) {
+      next.whenOrNull(
+        data: (message) {
+          if (message.isNotEmpty) {
+            ToastServices.success('Success', message);
+            ref.read(recentActivityProvider.notifier).fetchRecentActivity(
+                  userId: _currentUserId,
+                );
+          }
+        },
+        error: (error, _) => ToastServices.error('Error', 'Failed to launch campaign: $error'),
+      );
+    });
+
+    return AnimatedBuilder(
+      animation: _ui,
+      builder: (context, _) => Scaffold(
       backgroundColor: AppColors.whiteColor,
       body: SafeArea(
         child: SingleChildScrollView(
@@ -119,6 +193,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
                   assistantsState,
                   contactsState,
                   startCallState,
+                  bulkCampaignState,
                 ),
               ),
               const SizedBox(height: 24),
@@ -257,6 +332,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
           ),
         ),
       ),
+      ),
     );
   }
 
@@ -265,6 +341,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
     AssistantsState assistantsState,
     ContactsState contactsState,
     StartCallState startCallState,
+    AsyncValue<String> bulkCampaignState,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -272,7 +349,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
         SegmentedToggle(
           labels: const ['Single Call', 'Bulk Calls'],
           selectedIndex: _isBulkMode ? 1 : 0,
-          onChanged: (index) => setState(() => _isBulkMode = index == 1),
+          onChanged: (index) => _update(() => _isBulkMode = index == 1),
           selectedColor: AppColors.primary,
         ),
         const SizedBox(height: 24),
@@ -282,6 +359,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
             assistantsState,
             contactsState,
             startCallState,
+            bulkCampaignState,
           ),
         ] else ...[
           ..._buildSingleFields(outboundState, assistantsState, contactsState),
@@ -381,7 +459,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
             value: _selectedOutbound!,
             items: _buildOutboundItems(phoneNumbers),
             onChanged: (val) {
-              if (val != null) setState(() => _selectedOutbound = val);
+              if (val != null) _update(() => _selectedOutbound = val);
             },
           );
         },
@@ -454,7 +532,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
             value: _selectedAssistant!,
             items: _buildAssistantItems(assistants),
             onChanged: (val) {
-              if (val != null) setState(() => _selectedAssistant = val);
+              if (val != null) _update(() => _selectedAssistant = val);
             },
           );
         },
@@ -527,7 +605,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
             value: _selectedContact!,
             items: _buildContactItems(contacts),
             onChanged: (val) {
-              if (val != null) setState(() => _selectedContact = val);
+              if (val != null) _update(() => _selectedContact = val);
             },
           );
         },
@@ -634,13 +712,19 @@ class _CallsPageState extends ConsumerState<CallsPage> {
     AssistantsState assistantsState,
     ContactsState contactsState,
     StartCallState startCallState,
+    AsyncValue<String> bulkCampaignState,
   ) {
     final authState = ref.watch(authProvider);
     final userId = authState.maybeWhen(
       authenticated: (user) => user.id,
       orElse: () => 'd6e723df-7a48-4710-aa9a-57f32763eb19',
     );
-    final groupsAsync = ref.watch(campaignGroupsProvider(userId));
+    final groupsAsync = _selectedTargetAudienceMode == 'BY GROUP'
+      ? ref.watch(campaignGroupsProvider(userId))
+      : const AsyncValue.data(<String>[]);
+    final filesAsync = _selectedTargetAudienceMode == 'BY FILE'
+      ? ref.watch(campaignFilesProvider(userId))
+      : const AsyncValue.data(<String>[]);
     // Calculate Selected Count based on target audience mode
     String selectedCountText = '0 SELECTED';
     contactsState.maybeWhen(
@@ -720,7 +804,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
               ),
               border: InputBorder.none,
             ),
-            onChanged: (val) => setState(() {}),
+            onChanged: (val) => _update(() {}),
           ),
         ),
         const SizedBox(height: 20),
@@ -744,7 +828,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
               value: _selectedAssistant!,
               items: _buildAssistantItems(assistants),
               onChanged: (val) {
-                if (val != null) setState(() => _selectedAssistant = val);
+                if (val != null) _update(() => _selectedAssistant = val);
               },
             );
           },
@@ -770,7 +854,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
               value: _selectedOutbound!,
               items: _buildOutboundItems(phoneNumbers),
               onChanged: (val) {
-                if (val != null) setState(() => _selectedOutbound = val);
+                if (val != null) _update(() => _selectedOutbound = val);
               },
             );
           },
@@ -801,7 +885,10 @@ class _CallsPageState extends ConsumerState<CallsPage> {
           ],
         ),
         const SizedBox(height: 8),
-        _buildTargetAudienceSelector(),
+        TargetAudienceSelector(
+          selectedMode: _selectedTargetAudienceMode,
+          onModeSelected: _selectTargetAudience,
+        ),
         const SizedBox(height: 12),
 
         // Dependent inputs based on Target Audience mode
@@ -822,19 +909,24 @@ class _CallsPageState extends ConsumerState<CallsPage> {
         ] else if (_selectedTargetAudienceMode == 'BY FILE') ...[
           _buildBulkFieldLabel(Icons.insert_drive_file_outlined, 'CSV File'),
           const SizedBox(height: 8),
-          _buildDropdownField<String>(
-            value: _selectedCsvFile ?? 'Select uploaded CSV',
-            items: const [
-              DropdownMenuItem(value: 'Select uploaded CSV', child: Text('Select uploaded CSV')),
-              DropdownMenuItem(value: 'leads_august.csv', child: Text('leads_august.csv (100 contacts)')),
-              DropdownMenuItem(value: 'campaign_data.csv', child: Text('campaign_data.csv (250 contacts)')),
-            ],
-            onChanged: (val) {
-              if (val != null && val != 'Select uploaded CSV') {
-                setState(() => _selectedCsvFile = val);
-              } else {
-                setState(() => _selectedCsvFile = null);
+          filesAsync.when(
+            loading: () => _buildDropdownFieldShimmer(),
+            error: (err, stack) => _buildErrorBox('Error: $err'),
+            data: (files) {
+              if (files.isEmpty) return _buildEmptyField('No uploaded files available');
+              final selectedFile = _selectedCsvFile != null && files.contains(_selectedCsvFile)
+                  ? _selectedCsvFile!
+                  : files.first;
+              if (_selectedCsvFile == null || !files.contains(_selectedCsvFile)) {
+                _selectedCsvFile = selectedFile;
               }
+              return _buildDropdownField<String>(
+                value: selectedFile,
+                items: files
+                    .map((file) => DropdownMenuItem(value: file, child: Text(file)))
+                    .toList(),
+                onChanged: (val) => _update(() => _selectedCsvFile = val),
+              );
             },
           ),
           const SizedBox(height: 20),
@@ -865,9 +957,9 @@ class _CallsPageState extends ConsumerState<CallsPage> {
                 onChanged: (val) {
                   if (val != null && val != 'Select contact') {
                     final match = contacts.firstWhere((c) => c.id == val);
-                    setState(() => _selectedBulkContact = match);
+                    _update(() => _selectedBulkContact = match);
                   } else {
-                    setState(() => _selectedBulkContact = null);
+                    _update(() => _selectedBulkContact = null);
                   }
                 },
               );
@@ -880,7 +972,10 @@ class _CallsPageState extends ConsumerState<CallsPage> {
         // Schedule Mode
         _buildBulkFieldLabel(Icons.calendar_month_outlined, 'Schedule'),
         const SizedBox(height: 8),
-        _buildScheduleSelector(),
+        ScheduleSelector(
+          selectedMode: _selectedScheduleMode,
+          onModeSelected: (mode) => _update(() => _selectedScheduleMode = mode),
+        ),
         const SizedBox(height: 12),
 
         // Dependent datetime input if Schedule mode is LATER
@@ -919,11 +1014,14 @@ class _CallsPageState extends ConsumerState<CallsPage> {
         ],
 
         // Calling hours switch
-        _buildCallingHoursCard(),
+        CallingHoursCard(
+          enabled: _callingHoursEnabled,
+          onChanged: (enabled) => _update(() => _callingHoursEnabled = enabled),
+        ),
         const SizedBox(height: 24),
 
         // Bottom launch campaign action button
-        _buildBulkLaunchButton(startCallState),
+        _buildBulkLaunchButton(assistantsState, bulkCampaignState),
       ],
     );
   }
@@ -972,157 +1070,20 @@ class _CallsPageState extends ConsumerState<CallsPage> {
     );
   }
 
-  Widget _buildTargetAudienceSelector() {
-    final modes = ['ALL CONTACTS', 'BY GROUP', 'BY FILE', 'SINGLE CONTACT'];
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: Row(
-        children: modes.map((mode) {
-          final isSelected = _selectedTargetAudienceMode == mode;
-          return Expanded(
-            child: InkWell(
-              onTap: () => setState(() => _selectedTargetAudienceMode = mode),
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColors.primary
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  mode,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 8.5,
-                    fontWeight: FontWeight.bold,
-                    color: isSelected ? Colors.white : const Color(0xFF64748B),
-                  ),
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildScheduleSelector() {
-    final modes = ['LAUNCH NOW', 'LATER'];
-    return Row(
-      children: modes.map((mode) {
-        final isSelected = _selectedScheduleMode == mode;
-        return Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(
-              right: mode == 'LAUNCH NOW' ? 8.0 : 0.0,
-              left: mode == 'LATER' ? 8.0 : 0.0,
-            ),
-            child: InkWell(
-              onTap: () => setState(() => _selectedScheduleMode = mode),
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColors.primary
-                      : const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isSelected
-                        ? AppColors.primary
-                        : const Color(0xFFE2E8F0),
-                  ),
-                ),
-                child: Text(
-                  mode,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: isSelected ? Colors.white : const Color(0xFF64748B),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildCallingHoursCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.more_time_outlined,
-                    color: Color(0xFF0F172A),
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Calling hours',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF0F172A),
-                    ),
-                  ),
-                ],
-              ),
-              Switch(
-                value: _callingHoursEnabled,
-                onChanged: (val) => setState(() => _callingHoursEnabled = val),
-                activeColor: AppColors.primary,
-                activeTrackColor: AppColors.primary.withValues(alpha: 0.35),
-                inactiveThumbColor: AppColors.white,
-                inactiveTrackColor: AppColors.primaryLight,
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            'Only place calls between these times (IST). Outside the window the campaign sleeps and auto-resumes — so it won\'t call at night.',
-            style: TextStyle(
-              fontSize: 11,
-              color: Color(0xFF64748B),
-              height: 1.4,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBulkLaunchButton(StartCallState startCallState) {
+  Widget _buildBulkLaunchButton(
+    AssistantsState assistantsState,
+    AsyncValue<String> bulkCampaignState,
+  ) {
     final isNameEmpty = _campaignNameController.text.trim().isEmpty;
     final isLaterMode = _selectedScheduleMode == 'LATER';
+    final isLoading = bulkCampaignState.isLoading;
     final buttonLabel = isLaterMode
         ? 'Schedule Campaign'
         : 'Launch Campaign Now';
     final buttonIcon = isLaterMode
         ? Icons.calendar_today_outlined
         : Icons.play_arrow_outlined;
-    final buttonBg = isNameEmpty
+    final buttonBg = isNameEmpty || isLoading
         ? const Color(0xFF94A3B8)
         : AppColors.primary;
 
@@ -1138,7 +1099,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
             borderRadius: BorderRadius.circular(14),
           ),
         ),
-        onPressed: () {
+        onPressed: isLoading ? null : () {
           if (isNameEmpty) {
             _showSnack('Please enter a campaign name.');
             return;
@@ -1148,19 +1109,70 @@ class _CallsPageState extends ConsumerState<CallsPage> {
             return;
           }
 
-          if (isLaterMode) {
-            _showSnack(
-              'Bulk campaign scheduled for ${_formatDateTime(_scheduledDateTime!)}.',
-            );
-          } else {
-            _showSnack(
-              'Bulk campaign "${_campaignNameController.text}" launched successfully.',
-            );
+          final assistantId = assistantsState.maybeWhen(
+            loaded: (assistants) => assistants
+                .where((assistant) => assistant.name == _selectedAssistant)
+                .map((assistant) => assistant.id)
+                .firstOrNull,
+            orElse: () => null,
+          );
+          if (assistantId == null) {
+            _showSnack('Please select an assistant.');
+            return;
           }
+          if (_selectedTargetAudienceMode == 'BY GROUP' && _selectedBulkGroup == null) {
+            _showSnack('Please select a group.');
+            return;
+          }
+          if (_selectedTargetAudienceMode == 'BY FILE' && _selectedCsvFile == null) {
+            _showSnack('Please select a file.');
+            return;
+          }
+          if (_selectedTargetAudienceMode == 'SINGLE CONTACT' && _selectedBulkContact == null) {
+            _showSnack('Please select a contact.');
+            return;
+          }
+
+          final targetType = switch (_selectedTargetAudienceMode) {
+            'BY GROUP' => 'group',
+            'BY FILE' => 'file',
+            'SINGLE CONTACT' => 'single',
+            _ => 'all',
+          };
+          final targetValue = switch (_selectedTargetAudienceMode) {
+            'BY GROUP' => _selectedBulkGroup,
+            'BY FILE' => _selectedCsvFile,
+            'SINGLE CONTACT' => _selectedBulkContact?.id,
+            _ => null,
+          };
+          final userId = _currentUserId;
+          if (userId == null) {
+            _showSnack('Please sign in before launching a campaign.');
+            return;
+          }
+
+          ref.read(bulkCampaignProvider.notifier).launch(
+                userId: userId,
+                name: _campaignNameController.text.trim(),
+                assistantId: assistantId,
+                phoneNumberId: null,
+                defaultLine: 'indian',
+                targetType: targetType,
+                targetValue: targetValue,
+                batchSize: 5,
+                runAt: isLaterMode ? _scheduledDateTime : null,
+                callWindowEnabled: _callingHoursEnabled,
+              );
         },
-        icon: Icon(buttonIcon, size: 20),
+        icon: isLoading
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+              )
+            : Icon(buttonIcon, size: 20),
         label: Text(
-          buttonLabel,
+          isLoading ? 'Launching...' : buttonLabel,
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
         ),
       ),
@@ -1207,7 +1219,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
         },
       );
       if (pickedTime != null) {
-        setState(() {
+        _update(() {
           _scheduledDateTime = DateTime(
             pickedDate.year,
             pickedDate.month,
@@ -1239,7 +1251,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
       children: [
         InkWell(
           onTap: () {
-            setState(() {
+            _update(() {
               _isGroupDropdownExpanded = !_isGroupDropdownExpanded;
               if (!_isGroupDropdownExpanded) {
                 _groupSearchQuery = '';
@@ -1302,7 +1314,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
                   child: TextField(
                     controller: _groupSearchController,
                     onChanged: (val) {
-                      setState(() => _groupSearchQuery = val);
+                      _update(() => _groupSearchQuery = val);
                     },
                     decoration: const InputDecoration(
                       hintText: 'Search...',
@@ -1334,7 +1346,7 @@ class _CallsPageState extends ConsumerState<CallsPage> {
                         final isSelected = _selectedBulkGroup == group;
                         return InkWell(
                           onTap: () {
-                            setState(() {
+                            _update(() {
                               _selectedBulkGroup = group;
                               _isGroupDropdownExpanded = false;
                               _groupSearchQuery = '';
@@ -1409,6 +1421,13 @@ class _CallsPageState extends ConsumerState<CallsPage> {
         child: DropdownButton<T>(
           value: value,
           isExpanded: true,
+          dropdownColor: Colors.white,
+          focusColor: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          style: const TextStyle(
+            color: Color(0xFF0F172A),
+            fontSize: 14,
+          ),
           icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF64748B)),
           items: items,
           onChanged: onChanged,
